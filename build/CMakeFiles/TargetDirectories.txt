@@ -1,0 +1,4 @@
+C:/Users/Peter/Documents/Console/build/CMakeFiles/Console.dir
+C:/Users/Peter/Documents/Console/build/CMakeFiles/rebuild_cache.dir
+C:/Users/Peter/Documents/Console/build/CMakeFiles/ConsoleAssist.dir
+C:/Users/Peter/Documents/Console/build/CMakeFiles/edit_cache.dir

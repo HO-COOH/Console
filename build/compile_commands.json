@@ -1,0 +1,12 @@
+[
+{
+  "directory": "C:/Users/Peter/Documents/Console/build",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP   /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   -std:c++17 /FoCMakeFiles\\Console.dir\\main.cpp.obj /FdCMakeFiles\\Console.dir/ /FS -c C:\\Users\\Peter\\Documents\\Console\\main.cpp",
+  "file": "C:/Users/Peter/Documents/Console/main.cpp"
+},
+{
+  "directory": "C:/Users/Peter/Documents/Console/build",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP   /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   -std:c++17 /FoCMakeFiles\\ConsoleAssist.dir\\main2.cpp.obj /FdCMakeFiles\\ConsoleAssist.dir/ /FS -c C:\\Users\\Peter\\Documents\\Console\\main2.cpp",
+  "file": "C:/Users/Peter/Documents/Console/main2.cpp"
+}
+]
