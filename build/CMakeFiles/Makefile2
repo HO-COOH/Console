@@ -95,12 +95,12 @@ clean: CMakeFiles/ConsoleAssist.dir/clean
 CMakeFiles/Console.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console.dir\build.make CMakeFiles/Console.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console.dir\build.make CMakeFiles/Console.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=C:\Users\Peter\Documents\Console\build\CMakeFiles --progress-num=1,2 "Built target Console"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=C:\Users\Peter\Documents\Console\build\CMakeFiles --progress-num=1,2,3,4,5 "Built target Console"
 .PHONY : CMakeFiles/Console.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/Console.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\Peter\Documents\Console\build\CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\Peter\Documents\Console\build\CMakeFiles 5
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/Console.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\Peter\Documents\Console\build\CMakeFiles 0
 .PHONY : CMakeFiles/Console.dir/rule
@@ -122,7 +122,7 @@ CMakeFiles/Console.dir/clean:
 CMakeFiles/ConsoleAssist.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\ConsoleAssist.dir\build.make CMakeFiles/ConsoleAssist.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\ConsoleAssist.dir\build.make CMakeFiles/ConsoleAssist.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=C:\Users\Peter\Documents\Console\build\CMakeFiles --progress-num=3,4 "Built target ConsoleAssist"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=C:\Users\Peter\Documents\Console\build\CMakeFiles --progress-num=6,7 "Built target ConsoleAssist"
 .PHONY : CMakeFiles/ConsoleAssist.dir/all
 
 # Build rule for subdir invocation for target.

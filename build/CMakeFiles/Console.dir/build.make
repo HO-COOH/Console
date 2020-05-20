@@ -89,18 +89,63 @@ CMakeFiles/Console.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Console.dir/main.cpp.s"
 	C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1425~1.286\bin\Hostx64\x64\cl.exe  /nologo /TP $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) /FoNUL /FAs /FaCMakeFiles\Console.dir\main.cpp.s /c C:\Users\Peter\Documents\Console\main.cpp
 
+CMakeFiles/Console.dir/Console.cpp.obj: CMakeFiles/Console.dir/flags.make
+CMakeFiles/Console.dir/Console.cpp.obj: ../Console.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\Peter\Documents\Console\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/Console.dir/Console.cpp.obj"
+	C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1425~1.286\bin\Hostx64\x64\cl.exe  /nologo /TP $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) /FoCMakeFiles\Console.dir\Console.cpp.obj /FdCMakeFiles\Console.dir/ /FS -c C:\Users\Peter\Documents\Console\Console.cpp
+
+CMakeFiles/Console.dir/Console.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Console.dir/Console.cpp.i"
+	C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1425~1.286\bin\Hostx64\x64\cl.exe > CMakeFiles\Console.dir\Console.cpp.i  /nologo /TP $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\Peter\Documents\Console\Console.cpp
+
+CMakeFiles/Console.dir/Console.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Console.dir/Console.cpp.s"
+	C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1425~1.286\bin\Hostx64\x64\cl.exe  /nologo /TP $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) /FoNUL /FAs /FaCMakeFiles\Console.dir\Console.cpp.s /c C:\Users\Peter\Documents\Console\Console.cpp
+
+CMakeFiles/Console.dir/ConsoleEngine.cpp.obj: CMakeFiles/Console.dir/flags.make
+CMakeFiles/Console.dir/ConsoleEngine.cpp.obj: ../ConsoleEngine.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\Peter\Documents\Console\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/Console.dir/ConsoleEngine.cpp.obj"
+	C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1425~1.286\bin\Hostx64\x64\cl.exe  /nologo /TP $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) /FoCMakeFiles\Console.dir\ConsoleEngine.cpp.obj /FdCMakeFiles\Console.dir/ /FS -c C:\Users\Peter\Documents\Console\ConsoleEngine.cpp
+
+CMakeFiles/Console.dir/ConsoleEngine.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Console.dir/ConsoleEngine.cpp.i"
+	C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1425~1.286\bin\Hostx64\x64\cl.exe > CMakeFiles\Console.dir\ConsoleEngine.cpp.i  /nologo /TP $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\Peter\Documents\Console\ConsoleEngine.cpp
+
+CMakeFiles/Console.dir/ConsoleEngine.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Console.dir/ConsoleEngine.cpp.s"
+	C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1425~1.286\bin\Hostx64\x64\cl.exe  /nologo /TP $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) /FoNUL /FAs /FaCMakeFiles\Console.dir\ConsoleEngine.cpp.s /c C:\Users\Peter\Documents\Console\ConsoleEngine.cpp
+
+CMakeFiles/Console.dir/Shape.cpp.obj: CMakeFiles/Console.dir/flags.make
+CMakeFiles/Console.dir/Shape.cpp.obj: ../Shape.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\Peter\Documents\Console\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/Console.dir/Shape.cpp.obj"
+	C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1425~1.286\bin\Hostx64\x64\cl.exe  /nologo /TP $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) /FoCMakeFiles\Console.dir\Shape.cpp.obj /FdCMakeFiles\Console.dir/ /FS -c C:\Users\Peter\Documents\Console\Shape.cpp
+
+CMakeFiles/Console.dir/Shape.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Console.dir/Shape.cpp.i"
+	C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1425~1.286\bin\Hostx64\x64\cl.exe > CMakeFiles\Console.dir\Shape.cpp.i  /nologo /TP $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\Peter\Documents\Console\Shape.cpp
+
+CMakeFiles/Console.dir/Shape.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Console.dir/Shape.cpp.s"
+	C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1425~1.286\bin\Hostx64\x64\cl.exe  /nologo /TP $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) /FoNUL /FAs /FaCMakeFiles\Console.dir\Shape.cpp.s /c C:\Users\Peter\Documents\Console\Shape.cpp
+
 # Object files for target Console
 Console_OBJECTS = \
-"CMakeFiles/Console.dir/main.cpp.obj"
+"CMakeFiles/Console.dir/main.cpp.obj" \
+"CMakeFiles/Console.dir/Console.cpp.obj" \
+"CMakeFiles/Console.dir/ConsoleEngine.cpp.obj" \
+"CMakeFiles/Console.dir/Shape.cpp.obj"
 
 # External object files for target Console
 Console_EXTERNAL_OBJECTS =
 
 Console.exe: CMakeFiles/Console.dir/main.cpp.obj
+Console.exe: CMakeFiles/Console.dir/Console.cpp.obj
+Console.exe: CMakeFiles/Console.dir/ConsoleEngine.cpp.obj
+Console.exe: CMakeFiles/Console.dir/Shape.cpp.obj
 Console.exe: CMakeFiles/Console.dir/build.make
 Console.exe: CMakeFiles/Console.dir/objects1.rsp
 Console.exe: CMakeFiles/Console.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\Peter\Documents\Console\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable Console.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\Peter\Documents\Console\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable Console.exe"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\Console.dir\link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

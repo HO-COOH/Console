@@ -1,4 +1,7 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/Console.dir/Console.cpp.obj"
+  "CMakeFiles/Console.dir/ConsoleEngine.cpp.obj"
+  "CMakeFiles/Console.dir/Shape.cpp.obj"
   "CMakeFiles/Console.dir/main.cpp.obj"
   "Console.exe"
   "Console.exe.manifest"

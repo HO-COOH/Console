@@ -4,6 +4,9 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
+  "C:/Users/Peter/Documents/Console/Console.cpp" "C:/Users/Peter/Documents/Console/build/CMakeFiles/Console.dir/Console.cpp.obj"
+  "C:/Users/Peter/Documents/Console/ConsoleEngine.cpp" "C:/Users/Peter/Documents/Console/build/CMakeFiles/Console.dir/ConsoleEngine.cpp.obj"
+  "C:/Users/Peter/Documents/Console/Shape.cpp" "C:/Users/Peter/Documents/Console/build/CMakeFiles/Console.dir/Shape.cpp.obj"
   "C:/Users/Peter/Documents/Console/main.cpp" "C:/Users/Peter/Documents/Console/build/CMakeFiles/Console.dir/main.cpp.obj"
   )
 set(CMAKE_CXX_COMPILER_ID "MSVC")

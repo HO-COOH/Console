@@ -155,6 +155,87 @@ ConsoleAssist/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\ConsoleAssist.dir\build.make CMakeFiles/ConsoleAssist.dir/build
 .PHONY : ConsoleAssist/fast
 
+Console.obj: Console.cpp.obj
+
+.PHONY : Console.obj
+
+# target to build an object file
+Console.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console.dir\build.make CMakeFiles/Console.dir/Console.cpp.obj
+.PHONY : Console.cpp.obj
+
+Console.i: Console.cpp.i
+
+.PHONY : Console.i
+
+# target to preprocess a source file
+Console.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console.dir\build.make CMakeFiles/Console.dir/Console.cpp.i
+.PHONY : Console.cpp.i
+
+Console.s: Console.cpp.s
+
+.PHONY : Console.s
+
+# target to generate assembly for a file
+Console.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console.dir\build.make CMakeFiles/Console.dir/Console.cpp.s
+.PHONY : Console.cpp.s
+
+ConsoleEngine.obj: ConsoleEngine.cpp.obj
+
+.PHONY : ConsoleEngine.obj
+
+# target to build an object file
+ConsoleEngine.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console.dir\build.make CMakeFiles/Console.dir/ConsoleEngine.cpp.obj
+.PHONY : ConsoleEngine.cpp.obj
+
+ConsoleEngine.i: ConsoleEngine.cpp.i
+
+.PHONY : ConsoleEngine.i
+
+# target to preprocess a source file
+ConsoleEngine.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console.dir\build.make CMakeFiles/Console.dir/ConsoleEngine.cpp.i
+.PHONY : ConsoleEngine.cpp.i
+
+ConsoleEngine.s: ConsoleEngine.cpp.s
+
+.PHONY : ConsoleEngine.s
+
+# target to generate assembly for a file
+ConsoleEngine.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console.dir\build.make CMakeFiles/Console.dir/ConsoleEngine.cpp.s
+.PHONY : ConsoleEngine.cpp.s
+
+Shape.obj: Shape.cpp.obj
+
+.PHONY : Shape.obj
+
+# target to build an object file
+Shape.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console.dir\build.make CMakeFiles/Console.dir/Shape.cpp.obj
+.PHONY : Shape.cpp.obj
+
+Shape.i: Shape.cpp.i
+
+.PHONY : Shape.i
+
+# target to preprocess a source file
+Shape.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console.dir\build.make CMakeFiles/Console.dir/Shape.cpp.i
+.PHONY : Shape.cpp.i
+
+Shape.s: Shape.cpp.s
+
+.PHONY : Shape.s
+
+# target to generate assembly for a file
+Shape.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console.dir\build.make CMakeFiles/Console.dir/Shape.cpp.s
+.PHONY : Shape.cpp.s
+
 main.obj: main.cpp.obj
 
 .PHONY : main.obj
@@ -219,6 +300,15 @@ help:
 	@echo ... rebuild_cache
 	@echo ... Console
 	@echo ... ConsoleAssist
+	@echo ... Console.obj
+	@echo ... Console.i
+	@echo ... Console.s
+	@echo ... ConsoleEngine.obj
+	@echo ... ConsoleEngine.i
+	@echo ... ConsoleEngine.s
+	@echo ... Shape.obj
+	@echo ... Shape.i
+	@echo ... Shape.s
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s
