@@ -1,10 +1,10 @@
 #pragma once
-#include "Windows.h"
 #include <utility>
 #include <string>
 #include <iostream>
 #include <algorithm>
 #include "ConsoleEngine.h"
+
 class Drawable
 {
 protected:
@@ -14,15 +14,16 @@ protected:
     short starting_row;
     short starting_col;
     virtual char& operator()(short row, short col)const { return buffer(row+starting_row, col+starting_col).Char.AsciiChar;}
+    virtual CHAR_INFO& at(short row, short col) const { return buffer(row + starting_row, col + starting_col); }
 public:
     Drawable(short width, short height, BufferObject& buffer, short starting_row, short starting_col)
-        :width(width), height(height), buffer(buffer), starting_row(starting_row), starting_col(starting_col)
-    {}
+        :   width(width),
+            height(height),
+            buffer(buffer),
+            starting_row(starting_row),
+            starting_col(starting_col) { }
+    void setColor(Color color, bool text_intensify = true, BackgroundColor bgColor = BackgroundColor::DEFAULT, bool bg_intensity = false);
     virtual void draw() const = 0;
-    void set(Color color) 
-    {
-
-    }
 };
 
 
@@ -39,7 +40,7 @@ protected:
     short endRow() const { return down == ' ' ? height - 2 : height - 1; }
     short endCol() const { return right == ' ' ? width - 2 : width - 1; }
 public:
-    virtual void draw() const override;
+    virtual void draw() const override { drawBorder(); }
     
     enum class Divisor
     {
@@ -110,7 +111,7 @@ private:
     short m_cols = 1;
 public:
     Form(short width, short height, BufferObject& buffer, short starting_row, short starting_col)
-    : RectangleArea(width, height, buffer, starting_row, starting_col) {}
+        : RectangleArea(width, height, buffer, starting_row, starting_col) {}
 
     /**
      * @brief: Set the size of the forms, size is including the heading rows 
@@ -132,8 +133,9 @@ public:
 
     void setHeading(std::vector<std::string_view> headings) { heading = std::move(headings); }
 
-    FormCell operator()(short row, short col);
+    FormCell& operator()(short row, short col);
     
     void draw() const override;
 
 };
+

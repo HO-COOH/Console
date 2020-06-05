@@ -1,13 +1,11 @@
 #pragma once
 #include "Console.h"
-#include "Shape.h"
 
 struct BufferObject
 {
     CHAR_INFO* buffer;
     short rows;
     short columns;
-
     BufferObject(short rows, short columns) :buffer(new CHAR_INFO[static_cast<size_t>(rows)* columns]), rows(rows), columns(columns) {}
     ~BufferObject() { delete[] buffer; }
     CHAR_INFO& operator()(short row, short column) { return buffer[row * columns + column]; }
@@ -21,23 +19,37 @@ private:
     short height;
     BufferObject buffer;
     Console* ptr;
+    bool wcharMode;
 public:
-    ConsoleEngine(Console& window) :width(window.getWidth()), height(window.getHeight()), buffer(height, width), ptr(&window) {
+    ConsoleEngine(Console& window, bool wcharMode=false) :width(window.getWidth()), height(window.getHeight()), buffer(height, width), ptr(&window), wcharMode(wcharMode) 
+    {
         CHAR_INFO default;
         default.Attributes = 7;
-        default.Char.AsciiChar = ' ';
+        if (wcharMode)
+            default.Char.AsciiChar = ' ';
+        else
+            default.Char.UnicodeChar = L' ';
         std::fill_n(*buffer, width * height, default);
     }
+
     void draw() const
     {
-        ptr->fillConsole(*buffer);
+        if (wcharMode)
+            ptr->fillConsoleW(*buffer);
+        else
+            ptr->fillConsole(*buffer);
     }
 
-    template <typename ToDraw>//, typename = std::enable_if_t<std::is_base_of_v<ToDraw, RectangleArea>>>
+    template <typename ToDraw>
+    ToDraw add(short width, short height, short x, short y)
+    {
+        return ToDraw{width, height, buffer, y, x};
+    }
+
+    template<typename ToDraw>
     ToDraw add()
     {
-        return ToDraw{width, height, buffer, 0, 0};
+        return ToDraw{ width, height, buffer, 0, 0 };
     }
-
-    ~ConsoleEngine() = default;
+    friend class VideoEngine;
 };

@@ -1,9 +1,10 @@
 #include "Console.h"
 #include "Command.h"
+#include <thread>	//for getKey
 
 Console::Console()
 {
-    is_std = count++ ==0? true:false;
+    is_std = (count++ == 0);
 
     if(is_std)
     {
@@ -109,3 +110,147 @@ Console& Console::set(Color color, bool intensify)
     return *this;
 }
 
+Console& Console::set(BackgroundColor bgColor, bool intensify)
+{
+    if (bgColor == BackgroundColor::NOCHANGE)
+        return *this;
+    current_background_color = static_cast<WORD>(bgColor);
+    if (intensify)
+        current_background_color |= BACKGROUND_INTENSITY;
+
+    setColor(current_foreground_color | static_cast<WORD>(current_background_color));
+    return *this;
+}
+
+void Console::changeWindowColor(BackgroundColor bgColor)
+{
+    if (bgColor == BackgroundColor::NOCHANGE)
+        return;
+    auto length = width * height;
+    DWORD actual_written = 0;
+    FillConsoleOutputCharacterA(hTerminal, static_cast<CHAR>(bgColor), length, { 0,0 }, &actual_written);
+}
+
+void Console::backspace(short count)
+{
+    CONSOLE_SCREEN_BUFFER_INFO screen_buffer_info;
+    if (GetConsoleScreenBufferInfo(hTerminal, &screen_buffer_info) != 0)
+    {
+        if (SetConsoleCursorPosition(hTerminal, { screen_buffer_info.dwCursorPosition.X - count, screen_buffer_info.dwCursorPosition.Y }) == 0)
+            LOG("Set Console Cursor Position failed!\n");
+        while (count-- > 0)
+            std::cout << ' ';
+    }
+    else
+        LOG("Get console screen buffer info failed!\n");
+}
+
+void Console::moveCursor(short count, Direction direction)
+{
+    CONSOLE_SCREEN_BUFFER_INFO screen_buffer_info;
+    if (GetConsoleScreenBufferInfo(hTerminal, &screen_buffer_info) != 0)
+    {
+        bool success = true;
+        switch (direction)
+        {
+        case Direction::UP:
+            success = SetConsoleCursorPosition(hTerminal, { screen_buffer_info.dwCursorPosition.X, screen_buffer_info.dwCursorPosition.Y > count ? screen_buffer_info.dwCursorPosition.Y - count : 0 });
+            break;
+        case Direction::DOWN:
+            success = SetConsoleCursorPosition(hTerminal, { screen_buffer_info.dwCursorPosition.X, screen_buffer_info.dwCursorPosition.Y + count });
+            break;
+        case Direction::LEFT:
+            success = SetConsoleCursorPosition(hTerminal, { screen_buffer_info.dwCursorPosition.X > count ? screen_buffer_info.dwCursorPosition.X - count : 0, screen_buffer_info.dwCursorPosition.Y });
+            break;
+        case Direction::RIGHT:
+            success = SetConsoleCursorPosition(hTerminal, { screen_buffer_info.dwCursorPosition.X + count, screen_buffer_info.dwCursorPosition.Y });
+            break;
+        }
+        if (!success)
+            LOG("Move cursor error!\n");
+    }
+    else
+        LOG("Get console screen buffer info failed!\n");
+}
+
+void Console::moveCursorTo(MIDDLE)
+{
+    CONSOLE_SCREEN_BUFFER_INFO screen_buffer_info;
+    GetConsoleScreenBufferInfo(hTerminal, &screen_buffer_info);
+    SetConsoleCursorPosition(hTerminal, { width / 2, screen_buffer_info.dwCursorPosition.Y });
+}
+
+COORD Console::getCursorPos() const
+{
+    CONSOLE_SCREEN_BUFFER_INFO info;
+    GetConsoleScreenBufferInfo(hTerminal, &info);
+    return { info.dwCursorPosition.X, info.dwCursorPosition.Y };
+}
+
+void Console::eraseLine()
+{
+    CONSOLE_SCREEN_BUFFER_INFO screen_buffer_info;
+    DWORD count;	//If the pointer to the last parameter is set to nullptr, there will be an exception
+    if (GetConsoleScreenBufferInfo(hTerminal, &screen_buffer_info) != 0)
+    {
+        if (screen_buffer_info.dwCursorPosition.X == 0)
+        {
+            FillConsoleOutputCharacter(hTerminal, ' ', screen_buffer_info.srWindow.Right, { 0, screen_buffer_info.dwCursorPosition.Y - 1 }, &count);//erase the last line
+            SetConsoleCursorPosition(hTerminal, { 0, screen_buffer_info.dwCursorPosition.Y - 1 });
+        }
+        else
+        {
+            FillConsoleOutputCharacter(hTerminal, ' ', screen_buffer_info.dwCursorPosition.Y + 1, { 0, screen_buffer_info.dwCursorPosition.Y }, &count);//erase current line
+            SetConsoleCursorPosition(hTerminal, { 0, screen_buffer_info.dwCursorPosition.Y });
+        }
+    }
+    else
+        LOG("Error in erase line!\n");
+}
+
+void Console::clear()
+{
+    DWORD actual_written = 0;
+    FillConsoleOutputCharacter(hTerminal, ' ', width * height, { 0,0 }, &actual_written);
+    SetConsoleCursorPosition(hTerminal, { 0,0 });
+}
+
+FunctionKey Console::getKey()
+{
+    while (true)
+    {
+        SHORT keys[static_cast<int>(FunctionKey::COUNT)]{};
+        for (auto i = 0; i < static_cast<int>(FunctionKey::COUNT); ++i)
+        {
+            keys[i] = GetAsyncKeyState(KeyCode[static_cast<FunctionKey>(i)]);
+            if ((keys[i] & 1) == 1)
+                return static_cast<FunctionKey>(i);
+        }
+        std::this_thread::sleep_for(std::chrono::microseconds{ 10 });
+    }
+    return FunctionKey::COUNT;
+}
+
+void Console::hideCursor()
+{
+    CONSOLE_CURSOR_INFO prev;
+    GetConsoleCursorInfo(hTerminal, &prev);
+    prev.bVisible = false;
+    if (SetConsoleCursorInfo(hTerminal, &prev) == 0)
+        std::cerr << "Hide cursor failed! Code: " << GetLastError() << '\n';
+}
+
+void Console::showCursor()
+{
+    CONSOLE_CURSOR_INFO prev;
+    GetConsoleCursorInfo(hTerminal, &prev);
+    prev.bVisible = true;
+    if (SetConsoleCursorInfo(hTerminal, &prev) == 0)
+        std::cerr << "Hide cursor failed! Code: " << GetLastError() << '\n';
+}
+
+Console::~Console()
+{
+    SetConsoleTextAttribute(hTerminal, default_attrib);
+    CloseHandle(hTerminal);
+}

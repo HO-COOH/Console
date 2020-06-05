@@ -5,4 +5,6 @@
 /.vs
 /.idea
 /cmake-build-debug
-/out/build
+/out
+/build
+/reference

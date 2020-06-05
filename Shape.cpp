@@ -2,6 +2,18 @@
 #include <iostream>
 #include <algorithm>
 
+void Drawable::setColor(Color color, bool text_intensify, BackgroundColor bgColor , bool bg_intensity)
+{
+    for (short row = starting_row; row < starting_row + height; ++row)
+    {
+
+        std::for_each(&buffer(row, starting_col), &buffer(row, starting_col + width - 1), [&](CHAR_INFO& character)
+            {
+                character.Attributes = static_cast<WORD>(color) | (text_intensify ? FOREGROUND_INTENSITY : 0) | static_cast<WORD>(bgColor) | (bg_intensity ? BACKGROUND_INTENSITY : 0);
+            });
+    }
+}
+
 void RectangleArea::drawBorder() const
 {
     if (up != ' ')
@@ -26,10 +38,6 @@ void RectangleArea::drawBorder() const
     }
 }
 
-void RectangleArea::draw() const
-{
-    drawBorder();
-}
 
 /*
     vertical divider:
@@ -138,3 +146,6 @@ void Form::draw() const
 void Form::FormCell::setText(std::string_view text)
 {
 }
+
+
+
