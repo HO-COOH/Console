@@ -111,6 +111,7 @@ class VideoEngine
     internal::Threadsafe queue;
     std::vector<std::thread> m_instances;
     std::deque<std::atomic_bool> finished_flags;
+    std::shared_mutex drawing_mutex;
     void draw();
     bool is_all_finished() const;
 public:

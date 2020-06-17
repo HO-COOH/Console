@@ -202,5 +202,5 @@ void VideoTestQuad()
 
 int main(int argc, char** argv)
 {
-    VideoTestSingle();
+    VideoTestDual();
 }

@@ -161,7 +161,11 @@ void VideoEngine::draw()
     while (!is_all_finished())
     {
         queue.wait_and_pop();
-        m_engine.draw();
+        {
+            drawing_mutex.lock();
+            m_engine.draw();
+            drawing_mutex.unlock();
+        }
     }
 }
 
@@ -210,13 +214,18 @@ VideoEngine::VideoEngine(std::vector<Video*> instances): m_engine(instances.fron
                         if (frame.empty())
                             break;
                         cv::resize(frame, resized, { instance->width, instance->height });
-                        for (auto i = 0; i < instance->height; ++i)
+                        
                         {
-                            for (auto j = 0; j < instance->width; ++j)
+                            drawing_mutex.lock_shared();
+                            for (auto i = 0; i < instance->height; ++i)
                             {
-                                auto pixel = resized.at<cv::Vec3b>(i, j);
-                                instance->at(i, j) = to_text(pixel[2], pixel[1], pixel[0]);
+                                for (auto j = 0; j < instance->width; ++j)
+                                {
+                                    auto pixel = resized.at<cv::Vec3b>(i, j);
+                                    instance->at(i, j) = to_text(pixel[2], pixel[1], pixel[0]);
+                                }
                             }
+                            drawing_mutex.unlock_shared();
                         }
                         queue.push(true);
                         t.wait();
