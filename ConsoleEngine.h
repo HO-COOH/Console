@@ -1,17 +1,7 @@
 #pragma once
 #include "Console.h"
-
-struct BufferObject
-{
-    CHAR_INFO* buffer;
-    short rows;
-    short columns;
-    BufferObject(short rows, short columns) :buffer(new CHAR_INFO[static_cast<size_t>(rows)* columns]), rows(rows), columns(columns) {}
-    ~BufferObject() { delete[] buffer; }
-    CHAR_INFO& operator()(short row, short column) { return buffer[row * columns + column]; }
-    CHAR_INFO* operator*() const { return buffer; }
-};
-
+#include "TextVideo.h"
+#include "BufferObject.hpp"
 class ConsoleEngine
 {
 private:
@@ -51,5 +41,34 @@ public:
     {
         return ToDraw{ width, height, buffer, 0, 0 };
     }
-    friend class VideoEngine;
+
+    /*Specialization*/
+    template<>
+    Video add()
+    {
+        return Video{ width, height, buffer, 0 ,0, *this };
+    }
+    template <>
+    Video add(short width, short height, short x, short y)
+    {
+        return Video{ width, height, buffer, y, x, *this };
+    }
+
+    template<typename Left, typename Right>
+    std::pair<Left, Right> divide(RectangleArea::Divisor d, short pos)
+    {
+        if (d == RectangleArea::Divisor::Horizontal)
+            return{
+            Left{pos, height, buffer, 0, 0},
+            Right{width - pos - 1, height, buffer, 0, pos + 1}
+        };
+        else    //vertical divisor
+            return {
+            Left{width, pos, buffer, 0, 0},
+            Right{width, height - pos - 1, buffer, pos + 1, 0}
+        };
+    }
+
+    void setWcharMode() { wcharMode = true; }
+    void setAsciiMode() { wcharMode = false; }
 };

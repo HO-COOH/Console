@@ -6,7 +6,7 @@
 #include <atomic>
 #include "TextVideo.h"
 
-
+const std::string currentDir = "../../../test/";
 
 //void PrintFps()
 //{
@@ -38,34 +38,34 @@
 //    std::cin.get();
 //}
 //
-//void TestConsole()
-//{
-//    /*Construct a new [Console] class */
-//    Console c;
-//
-//    /*Setting text color using familiar syntax */
-//    c << Color::RED << "This is a red text on black background\n";
-//    /*Or use traditional member function*/
-//    c.set(Color::MAGENTA).writeln("This is magenta text");
-//
-//    /*Setting background color using the same syntax */
-//    c << BackgroundColor::WHITE << "This is a magenta text on white background\n";
-//    c.set(BackgroundColor::DEFAULT, false).set(Color::WHITE);
-//
-//    /*Moving cursor using relative or absolute position */
-//    c.moveCursor(4, Direction::RIGHT);
-//    c << "Indent text\n";
-//    c.moveCursorTo({ 20,10 });
-//    c << "Text start at [20,10]\n";
-//    c.moveCursorTo(MIDDLE{});
-//    
-//    /*Erase one line or clear the whole window */
-//    c  << "Press enter to delete this line: ";
-//    std::cin.get();
-//    c.eraseLine();
-//    std::cin.get();
-//    c.clear();
-//}
+void TestConsole()
+{
+    /*Construct a new [Console] class */
+    Console c;
+
+    /*Setting text color using familiar syntax */
+    c << Color::RED << "This is a red text on black background\n";
+    /*Or use traditional member function*/
+    c.set(Color::MAGENTA).writeln("This is magenta text");
+
+    /*Setting background color using the same syntax */
+    c << BackgroundColor::WHITE << "This is a magenta text on white background\n";
+    c.set(BackgroundColor::DEFAULT, false).set(Color::WHITE);
+
+    /*Moving cursor using relative or absolute position */
+    c.moveCursor(4, Direction::RIGHT);
+    c << "Indent text\n";
+    c.moveCursorTo({ 20,10 });
+    c << "Text start at [20,10]\n";
+    c.moveCursorTo(MIDDLE{});
+    
+    /*Erase one line or clear the whole window */
+    c  << "Press enter to delete this line: ";
+    std::cin.get();
+    c.eraseLine();
+    std::cin.get();
+    c.clear();
+}
 //
 //void TestColor()
 //{
@@ -85,14 +85,68 @@
 //        eng.buffer(i+2, 1) = test[i];
 //    eng.draw();
 //}
-//
-void VideoTest()
+
+void VideoTestSingle()
 {
-    Console c;
-    ConsoleEngine eng{ c, true };
-    VideoEngine video{ eng };
-    video.load("test.mp4");
-    video.play(30);
+    Console console;
+    ConsoleEngine engine{ console };
+    engine.setWcharMode();
+    /*Play a single video*/
+    /*Or use multithreading to play multiple videos at once*/
+    auto frame = engine.add<Video>();
+    frame.load(currentDir + "test2.mp4");
+    frame.play(30);
+}
+
+void VideoTestDual()
+{
+    Console console;
+    ConsoleEngine engine{ console };
+    engine.setWcharMode();
+    /*Play a single video*/
+    /*Or use multithreading to play multiple videos at once*/
+    auto frame = engine.add<RectangleArea>();
+
+    auto [videoFrameLeft, videoFrameRight] = frame.divide(RectangleArea::Divisor::Vertical, 0);
+    auto v_left = videoFrameLeft.add<Video>(engine);
+    auto v_right = videoFrameRight.add<Video>(engine);
+
+    //v_UpLeft.load("test.mp4");
+    //v_UpRight.load("test.mp4");
+    //v_DownLeft.load("test.mp4");
+    //v_DownRight.load("test.mp4");
+    v_left.load(currentDir + "test.mp4");
+    v_right.load(currentDir + "test2.mp4");
+    VideoEngine videos{ std::vector{&v_left, &v_right} };
+}
+
+void VideoTestQuad()
+{
+    Console console;
+    ConsoleEngine engine{ console };
+    engine.setWcharMode();
+    /*Play a single video*/
+    /*Or use multithreading to play multiple videos at once*/
+    auto frame = engine.add<RectangleArea>();
+
+    auto [videoFrameLeft, videoFrameRight] = frame.divide(RectangleArea::Divisor::Vertical, 0);
+    auto [upLeft, downLeft] = videoFrameLeft.divide(RectangleArea::Divisor::Horizontal, 0);
+    auto [upRight, downRight] = videoFrameRight.divide(RectangleArea::Divisor::Horizontal, 0);
+    
+    auto v_UpLeft = upLeft.add<Video>(engine);
+    auto v_DownLeft = downLeft.add<Video>(engine);
+    auto v_UpRight = upRight.add<Video>(engine);
+    auto v_DownRight = downRight.add<Video>(engine);
+
+    //v_UpLeft.load("test.mp4");
+    //v_UpRight.load("test.mp4");
+    //v_DownLeft.load("test.mp4");
+    //v_DownRight.load("test.mp4");
+    v_UpLeft.load(currentDir+"test.mp4");
+    v_UpRight.load(currentDir + "test2.mkv");
+    v_DownLeft.load(currentDir + "test3.mkv");
+    v_DownRight.load(currentDir + "test4.mkv");
+    VideoEngine videos{ std::vector{&v_UpLeft, &v_DownLeft, &v_UpRight, &v_DownRight} };
 }
 //
 //void PictureTest()
@@ -118,17 +172,35 @@ void VideoTest()
 //    cv::destroyAllWindows();
 //}
 //
-//void TimerTest()
+
+//void ScrollViewTest()
 //{
-//    int i = 0;
-//    while (true)
-//    {
-//        ScopedTimer t{ 30 };
-//        std::cout << i++ << '\n';
-//    }
+//    Console c;
+//    ConsoleEngine eng{ c };
+//    auto canvas = eng.add<RectangleArea>();
+//    canvas.setBorder('U', 'D', 'L', 'R');
+//    auto [left, right] = canvas.divide(RectangleArea::Divisor::Vertical, 0);
+//    left.setBorder('1', '2', '3', '4');
+//    auto area = left.add<ScrollView>();
+//
+//    /*add text -> area*/
+//    area.push("Hello world1");
+//    area.push("Hello world1");
+//    area.push("Hello world1");
+//    area.push("Hello world1");
+//    area.push("Hello world1");
+//    area.push("Hello world1");
+//    area.push("Hello world1");
+//    area.push("Hello world1");
+//    area.push("A long text that needs two line to display ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+//    area.push("Hello world1");
+//
+//    area.draw();
+//
+//    eng.draw();
 //}
 
 int main(int argc, char** argv)
 {
-    VideoTest();
+    VideoTestSingle();
 }

@@ -8,7 +8,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Find Package
 find_package( OpenCV REQUIRED )
 
-
+# if(MSVC)
+#     add_definitions(WINDOWS)
+# endif()
 
 add_executable(Console main.cpp Console.cpp  Shape.cpp "TextVideo.cpp")
 if( OpenCV_FOUND )

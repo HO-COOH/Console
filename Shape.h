@@ -3,7 +3,9 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
-#include "ConsoleEngine.h"
+#include <deque>
+#include "Console.h"
+#include "BufferObject.hpp"
 
 class Drawable
 {
@@ -39,6 +41,8 @@ protected:
     short startCol() const { return left == ' ' ? 0 : 1; }
     short endRow() const { return down == ' ' ? height - 2 : height - 1; }
     short endCol() const { return right == ' ' ? width - 2 : width - 1; }
+    short getUsableWidth() const { return width - (left == ' ' ? 0 : 1) - (right == ' ' ? 0 : 1); }
+    short getUsableHeight() const { return height - (up == ' ' ? 0 : 1) - (down == ' ' ? 0 : 1); }
 public:
     virtual void draw() const override { drawBorder(); }
     
@@ -61,8 +65,9 @@ public:
         return os;
     }
 
-    template<typename Widget>
-    Widget add() { return Widget{width, height, buffer, starting_row, starting_col}; }
+    template<typename Widget, typename...Args>
+    Widget add(Args&&... args) { return Widget{getUsableWidth(), getUsableHeight(), buffer, starting_row+startRow(), starting_col+startCol(), args...}; }
+
 };
 
 class TextBox: public RectangleArea
@@ -72,13 +77,16 @@ public:
     void setText(std::string const& text);
 };
 
-//class ScrollView: public RectangleArea
-//{
-//public:
-//    ScrollView(short width, short height, CHAR_INFO* buffer_location):RectangleArea(width, height, buffer_location){}
-//    void push(std::string const &text);
-//};
-//
+class ScrollView: public RectangleArea
+{
+    std::deque<std::string> textQueue;
+    void pop();
+public:
+    ScrollView(short width, short height, BufferObject& buffer, short starting_row, short starting_col):RectangleArea(width, height, buffer, starting_row, starting_col){}
+    void push(std::string&& text) { textQueue.push_back(std::move(text)); pop(); }
+    void draw() const override;
+};
+
 
 class ProgressBar:public RectangleArea
 {

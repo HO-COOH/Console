@@ -12,6 +12,7 @@ public:
     {
         while (std::chrono::steady_clock::now() <= start + duration)
             ;
+        //std::this_thread::sleep_until(start + duration);
         start = std::chrono::steady_clock::now();
     }
 };

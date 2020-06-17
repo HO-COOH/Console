@@ -49,7 +49,6 @@ void RectangleArea::drawBorder() const
       divide here
 
     horizontal divider:
-
     ******
     ******
     ****** - divide here
@@ -68,7 +67,12 @@ std::pair<RectangleArea, RectangleArea> RectangleArea::divide(Divisor d, short p
         }
         if(pos==0)
             pos = (width - 2) / 2;
-        return {RectangleArea{pos-1, height-2, buffer, starting_row+1, starting_col+1}, RectangleArea{width - pos - 2, height-2, buffer, starting_row+1, pos+1}};
+        const short usable_height = height - (up == ' ' ? 0 : 1) - (down == ' ' ? 0 : 1);
+        const short usable_starting_row = up == ' ' ? starting_row : starting_row + 1;
+        return {
+            RectangleArea{left == ' ' ? pos : pos - 1,  usable_height, buffer, usable_starting_row, left == ' ' ? starting_col : starting_col + 1},
+            RectangleArea{width - pos - (right == ' ' ? 1 : 2), usable_height, buffer, usable_starting_row, pos + 1}
+        };
     }
     else
     {
@@ -79,7 +83,12 @@ std::pair<RectangleArea, RectangleArea> RectangleArea::divide(Divisor d, short p
         }
         if(pos==0)
             pos = (height - 2) / 2;
-        return {RectangleArea{width-2, pos-1, buffer, starting_row+1, starting_col+1}, RectangleArea{width-2, height - pos - 2, buffer, pos+1, starting_col+1}};
+        const short usable_width = width - (left == ' ' ? 0 : 1) - (right == ' ' ? 0 : 1);
+        const short usable_starting_col = left == ' ' ? starting_col : starting_col + 1;
+        return {
+            RectangleArea{usable_width, up == ' ' ? pos : pos - 1, buffer, up == ' ' ? starting_row : starting_row + 1, usable_starting_col },
+            RectangleArea{usable_width, height - pos - (down == ' ' ? 1 : 2), buffer, pos + 1, usable_starting_col}
+        };
     }
 }
 
@@ -149,3 +158,36 @@ void Form::FormCell::setText(std::string_view text)
 
 
 
+void ScrollView::pop()
+{
+    do
+    {
+        short lines = 0;
+        for (const auto& text : textQueue)
+            lines += 1 + std::ceill(text.length() / getUsableWidth());
+        if (lines <= getUsableHeight())
+            break;
+        else
+            textQueue.pop_front();
+    } while (true);
+}
+
+void ScrollView::draw() const
+{
+    short row = startRow();//if C++20: for(short row = 0; const auto& text : textQueue)
+    
+    for (const auto& text : textQueue)
+    {
+        short col = startCol();
+        for (auto character : text)
+        {
+            (*this)(row, col++) = character;
+            if (col >= getUsableWidth())
+            {
+                col = 0;
+                ++row;
+            }
+        }
+        ++row;
+    }
+}
