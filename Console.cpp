@@ -254,3 +254,30 @@ Console::~Console()
     SetConsoleTextAttribute(hTerminal, default_attrib);
     CloseHandle(hTerminal);
 }
+
+#include <new>
+static char ConsoleStorage[sizeof(Console)];
+class Console& console = reinterpret_cast<class Console&>(ConsoleStorage);
+unsigned ConsoleInitializer::count;
+
+void ConsoleInitializer::init()
+{
+    new(ConsoleStorage) Console{};
+}
+
+void ConsoleInitializer::cleanUp()
+{
+    console.~Console();
+}
+
+ConsoleInitializer::ConsoleInitializer()
+{
+    if (count++ == 0)
+        init();
+}
+
+ConsoleInitializer::~ConsoleInitializer()
+{
+    if (--count == 0)
+        cleanUp();
+}

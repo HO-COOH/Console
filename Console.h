@@ -4,13 +4,10 @@
 #include <string>
 #include <exception>
 #include <unordered_map>
-#define DEBUG
 
-#ifdef DEBUG
-#define LOG(X) {std::cerr<<(X);}
-#elif
+
 #define LOG(X) ;
-#endif
+
 
 enum class Color {
     BLACK = 0,
@@ -49,10 +46,11 @@ inline std::unordered_map<FunctionKey, int> KeyCode {
 };
 
 enum class Shade:wchar_t {
-    Full = 0x2588,
-    Dark = 0x2593,
-    Medium = 0x2592,
-    Light = 0x2591
+    Full = 0x2588,      //75-100
+    Dark = 0x2593,      //50-75
+    Medium = 0x2592,    //25-50
+    Light = 0x2591,     //0-25
+    None = ' ',
 };
 
 
@@ -215,3 +213,15 @@ Console& Console::writeln(const T& arg, Color color)
     }
     return *this;
 }
+
+extern class Console& console;
+class ConsoleInitializer
+{
+    static unsigned count;
+    static void init();
+    static void cleanUp();
+public:
+    ConsoleInitializer();
+    ~ConsoleInitializer();
+};
+static ConsoleInitializer consoleInitializer;
