@@ -147,3 +147,10 @@ public:
 
 };
 
+class Menu :public RectangleArea
+{
+public:
+    void setInactiveBackgroundColor();
+    void setActiveBackgroundColor();
+
+};

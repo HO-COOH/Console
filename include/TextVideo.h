@@ -20,25 +20,27 @@ struct Color_T
         return { 
             static_cast<uint8_t>(r * factor), 
             static_cast<uint8_t>(g * factor), 
-            static_cast<uint8_t>(b * factor) };
+            static_cast<uint8_t>(b * factor) 
+        };
     }
     Color_T operator+(Color_T rhs) const
     {
         return { 
             static_cast<uint8_t>(r + rhs.r),
             static_cast<uint8_t>(g + rhs.g),
-            static_cast<uint8_t>(b + rhs.b) };
+            static_cast<uint8_t>(b + rhs.b) 
+        };
     }
     Color_T operator-(Color_T rhs) const
     {
         return {
             static_cast<uint8_t>(((int)r - rhs.r) <0? 0 : r - rhs.r),
             static_cast<uint8_t>(((int)g - rhs.g) < 0? 0 : g - rhs.g),
-            static_cast<uint8_t>(((int)b - rhs.b) <0? 0: b-rhs.b) };
+            static_cast<uint8_t>(((int)b - rhs.b) <0? 0: b-rhs.b) 
+        };
     }
     float getIntensity() const
     {
-        //return sqrt((square(r) + square(g) + square(b)) / 3) / UINT8_MAX;
         return (float(r) + float(g) + float(b)) / 3.0f /(float)(UINT8_MAX) ;
     }
     int getDistance(Color_T rhs) const

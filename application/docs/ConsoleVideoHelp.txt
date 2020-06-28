@@ -1,0 +1,9 @@
+ConsoleVideo: A simple console video player, supports playing 1/2/4 video files simultaneously 
+Usage:
+    ConsoleVideo file1 [file2 file3 file4]
+    
+    If one file is followed, play it under full-screen mode
+    If two files are followed, play them under split-screen mode, one left, one right
+    If four files are followed, play them under quad-rangle mode.
+
+    Any other form of invoking are not supported at the time being!

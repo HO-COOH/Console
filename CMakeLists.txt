@@ -5,16 +5,32 @@ project(Console)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Find Package
-find_package( OpenCV CONFIG REQUIRED )
 
+# Detect operating system and compiler
 if(MSVC)
      add_definitions(-DWINDOWS)
 endif()
 
-add_executable(Console main.cpp Console.cpp  Shape.cpp "TextVideo.cpp")
-target_link_libraries(Console PRIVATE opencv_ml opencv_dnn opencv_flann opencv_features2d opencv_video opencv_videoio opencv_imgcodecs opencv_imgproc opencv_core opencv_highgui)
-#target_link_libraries(Console PRIVATE opencv_ml opencv_dnn opencv_core opencv_flann)
+include_directories("include")
+add_subdirectory(application)
 
+# ConsoleAssist target
+add_executable(ConsoleAssist "ConsoleAssist/ConsoleAssist.cpp")
 
-add_executable(ConsoleAssist "ConsoleAssist/main2.cpp")
+# Main testing target
+find_package( OpenCV CONFIG REQUIRED )
+include_directories("include")
+file(GLOB AllSource "source/*.cpp")
+add_executable(main main.cpp ${AllSource})
+target_link_libraries(main
+    PRIVATE
+    opencv_ml
+    opencv_dnn
+    opencv_flann
+    opencv_features2d
+    opencv_video
+    opencv_imgcodecs
+    opencv_imgproc
+    opencv_core
+    opencv_highgui
+)

@@ -6,7 +6,7 @@
 #include <thread>
 #include <atomic>
 
-const std::string currentDir = "../../../test/";
+
 
 
 void TestEngine()
@@ -75,84 +75,7 @@ void TestConsole()
 //    eng.draw();
 //}
 
-void VideoTestSingle()
-{
-    const std::string file = "test.mp4";
-    ConsoleEngine engine{ console };
-    engine.setWcharMode();
-    /*Play a single video*/
-    /*Or use multithreading to play multiple videos at once*/
-    
-    auto frame = engine.add<Video>();
-    frame.load(currentDir + file);
-    /*windows cmd doesn't like .. so I copied it to the build directory*/
-    system(file.c_str());
-    frame.play(30);
-    
-    //TEST only
-    //frame.drawColorWall();
-}
 
-void VideoTestDual()
-{
-    console.printConsoleInfo();
-    ConsoleEngine engine{ console };
-    engine.setWcharMode();
-    /*Play a single video*/
-    /*Or use multithreading to play multiple videos at once*/
-    auto frame = engine.add<RectangleArea>();
-
-    auto [videoFrameLeft, videoFrameRight] = frame.divide(RectangleArea::Divisor::Vertical, 0);
-    auto v_left = videoFrameLeft.add<Video>(engine);
-    auto v_right = videoFrameRight.add<Video>(engine);
-
-    //v_UpLeft.load("test.mp4");
-    //v_UpRight.load("test.mp4");
-    //v_DownLeft.load("test.mp4");
-    //v_DownRight.load("test.mp4");
-    v_left.load(currentDir + "test.mp4");
-    v_right.load(currentDir + "test2.mp4");
-    VideoEngine videos{ std::vector{&v_left, &v_right} };
-}
-
-void VideoTestQuad()
-{
-    ConsoleEngine engine{ console };
-    engine.setWcharMode();
-    /*Play a single video*/
-    /*Or use multithreading to play multiple videos at once*/
-    auto frame = engine.add<RectangleArea>();
-
-    auto [videoFrameLeft, videoFrameRight] = frame.divide(RectangleArea::Divisor::Vertical, 0);
-    auto [upLeft, downLeft] = videoFrameLeft.divide(RectangleArea::Divisor::Horizontal, 0);
-    auto [upRight, downRight] = videoFrameRight.divide(RectangleArea::Divisor::Horizontal, 0);
-    
-    auto v_UpLeft = upLeft.add<Video>(engine);
-    auto v_DownLeft = downLeft.add<Video>(engine);
-    auto v_UpRight = upRight.add<Video>(engine);
-    auto v_DownRight = downRight.add<Video>(engine);
-
-    //v_UpLeft.load("test.mp4");
-    //v_UpRight.load("test.mp4");
-    //v_DownLeft.load("test.mp4");
-    //v_DownRight.load("test.mp4");
-    v_UpLeft.load(currentDir+"test.mp4");
-    v_UpRight.load(currentDir + "test2.mkv");
-    v_DownLeft.load(currentDir + "test3.mkv");
-    v_DownRight.load(currentDir + "test4.mkv");
-    VideoEngine videos{ std::vector{&v_UpLeft, &v_DownLeft, &v_UpRight, &v_DownRight} };
-}
-
-void PictureTest()
-{
-    const std::string file = "test.jpg";
-    Console console;
-    ConsoleEngine engine{ console };
-    engine.setWcharMode();
-
-    auto frame = engine.add<PictureEngine>();
-    frame.load(currentDir + file);
-}
 
 
 void ScrollViewTest()
