@@ -15,8 +15,10 @@ protected:
     BufferObject& buffer;
     short starting_row;
     short starting_col;
-    virtual char& operator()(short row, short col)const { return buffer(row+starting_row, col+starting_col).Char.AsciiChar;}
-    virtual CHAR_INFO& at(short row, short col) const { return buffer(row + starting_row, col + starting_col); }
+    char& operator()(short row, short col)const { return buffer(row+starting_row, col+starting_col).Char.AsciiChar;}
+    CHAR_INFO& at(short row, short col) const { return buffer(row + starting_row, col + starting_col); }
+    //auto begin() { return BufferObject::BufferObjectIterator{ &at(0,0) }; }
+    //auto end() { return BufferObject::BufferObjectIterator{ &at(height, width) }; }
 public:
     Drawable(short width, short height, BufferObject& buffer, short starting_row, short starting_col)
         :   width(width),
@@ -26,6 +28,33 @@ public:
             starting_col(starting_col) { }
     void setColor(Color color, bool text_intensify = true, BackgroundColor bgColor = BackgroundColor::DEFAULT, bool bg_intensity = false);
     virtual void draw() const = 0;
+
+    //class BufferIterator
+    //{
+    //    CHAR_INFO* m_ptr;
+    //    short width;
+    //    short height;
+    //    short currentX{};
+    //    short currentY{};
+    //public:
+    //    BufferIterator(CHAR_INFO* ptr, Drawable const& drawable) :m_ptr(ptr), width(drawable.width), height(drawable.height) {}
+    //    CHAR_INFO& operator*() { return *m_ptr; }
+    //    CHAR_INFO const& operator*() const { return *m_ptr; }
+    //    CHAR_INFO* operator->() { return m_ptr; }
+    //    BufferIterator& operator++() 
+    //    {
+    //        if(++currentX)
+    //        ++m_ptr;
+    //        return *this; 
+    //    }
+    //    BufferIterator& operator--() 
+    //    { 
+    //        --m_ptr;
+    //        return *this;
+    //    }
+    //    bool operator==(BufferIterator const& rhs) { return m_ptr == rhs.m_ptr; }
+    //    bool operator!=(BufferIterator const& rhs) { return m_ptr != rhs.m_ptr; }
+    //};
 };
 
 

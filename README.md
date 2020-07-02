@@ -5,37 +5,37 @@ The original implementation was used in [Simple TCP chatroom Client](https://git
 ## How to use
 Compile time polymorphism is given higher priority. But I tried to make it easy to use.
 
+**``console`` is a global object that is guaranteed to initialized first before you use, so no need to construct it anymore if you only use one console window**
+
 In the future, runtime polymorphism will be considered.
 
 An example of using ``Console`` class.
 ```cpp
 void TestConsole()
 {
-    /*Construct a new [Console] class */
-    Console c;
 
     /*Setting text color using familiar syntax */
-    c << Color::RED << "This is a red text on black background\n";
+    console << Color::RED << "This is a red text on black background\n";
     /*Or use traditional member function*/
-    c.set(Color::MAGENTA).writeln("This is magenta text");
+    console.set(Color::MAGENTA).writeln("This is magenta text");
 
     /*Setting background color using the same syntax */
-    c << BackgroundColor::WHITE << "This is a magenta text on white background\n";
-    c.set(BackgroundColor::DEFAULT, false).set(Color::WHITE);
+    console << BackgroundColor::WHITE << "This is a magenta text on white background\n";
+    console.set(BackgroundColor::DEFAULT, false).set(Color::WHITE);
 
     /*Moving cursor using relative or absolute position */
-    c.moveCursor(4, Direction::RIGHT);
-    c << "Indent text\n";
-    c.moveCursorTo({ 20,10 });
-    c << "Text start at [20,10]\n";
-    c.moveCursorTo(MIDDLE{});
+    console.moveCursor(4, Direction::RIGHT);
+    console << "Indent text\n";
+    console.moveCursorTo({ 20,10 });
+    console << "Text start at [20,10]\n";
+    console.moveCursorTo(MIDDLE{});
     
     /*Erase one line or clear the whole window */
-    c  << "Press enter to delete this line: ";
+    console << "Press enter to delete this line: ";
     std::cin.get();
-    c.eraseLine();
+    console.eraseLine();
     std::cin.get();
-    c.clear();
+    console.clear();
 }
 ```
 
@@ -44,7 +44,6 @@ void TestConsole()
 #include "ConsoleEngine.h"  //For Console drawing engine
 int main()
 {
-    Console console;            //create a console window
     ConsoleEngine eng{console}; //create a console engine, bind with the just-created window
 
     auto canvas=eng.add<RectangleArea>();   //create a rectangleArea, returns a handle to the area
@@ -87,7 +86,6 @@ std::cout << bar << '\n';
 #include <VideoEngine.h>
 void VideoTest()
 {
-    Console console;
     ConsoleEngine engine{console};
     /*Play a single video*/
     {
@@ -109,6 +107,10 @@ void VideoTest()
 }
 ```
 - A single-video-single-window demo
+  + [(China) GrayScale Video Demo](https://www.bilibili.com/video/BV1aK411p7hJ)
+  + [(China) Colored Video Demo](https://www.bilibili.com/video/BV165411Y7w6)
+  + [(Non China) GrayScale Video Demo](https://www.youtube.com/watch?v=0b1pUuar8Fc&t=151s)
+  + [(Non China) Colored Video Demo](https://www.youtube.com/watch?v=9k3mMGZGRz4)
 - A multi-video-single-window demo
 ### PictureEngine
 

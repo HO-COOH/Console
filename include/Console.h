@@ -67,6 +67,8 @@ private:
     WORD current_foreground_color;
     void setColor(WORD color);
     void sendPipe(std::string_view msg) const;
+    void constructSecondaryConsole();
+    void constructStdConsole();
 public:
 
     class ConsoleException:public std::runtime_error
@@ -77,6 +79,7 @@ public:
 
     /*Console configuration functions*/
     Console();
+    Console(short width, short height, short fontWidth, short fontHeight);
     void printConsoleInfo() const;
     auto getWidth() const { return width; }
     auto getHeight() const { return height; }

@@ -154,10 +154,15 @@ void Video::play(unsigned int frameRate)
         cv::resize(frame, resized, { width, height });
         for (auto i = 0; i < height; ++i)
         {
+            /*Use pointer dereference instead of array indexing for slightly lower CPU usage */
+            auto bufferPtr = &at(i, 0);
+            auto resizedRowPtr = resized.ptr<cv::Vec3b>(i);
             for (auto j = 0; j < width; ++j)
             {
-                auto pixel = resized.at<cv::Vec3b>(i, j);
-                buffer(i, j) = to_text(Color_T{ pixel[2], pixel[1], pixel[0] });
+                const auto pixel = *resizedRowPtr;
+                *bufferPtr = to_text(Color_T{ pixel[2], pixel[1], pixel[0] });
+                ++bufferPtr;
+                ++resizedRowPtr;
             }
         }
         t.wait();

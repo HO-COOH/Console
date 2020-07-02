@@ -5,7 +5,7 @@
 #include <iostream>
 #include <iterator>
 
-const std::string currentDir = "../../../test/";
+const std::string currentDir = "../../../../test/";
 
 void VideoTestSingle(std::string const& file)
 {
@@ -87,6 +87,9 @@ void PictureTest()
 
 inline void printUsage()
 {
+#ifdef WINDOWS
+    system("cd");
+#endif
     std::cout << R"(
     ConsoleVideo: A simple console video player, supports playing 1 / 2 / 4 video files simultaneously
         Usage :
@@ -103,6 +106,8 @@ inline void printUsage()
 int main(int argc, char** argv)
 {
     const auto argCount = argc - 1;
+    if(argc==2)
+        system(argv[1]);
     switch (argCount)
     {
     case 1:

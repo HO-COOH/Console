@@ -1,8 +1,9 @@
 # Find Package
 find_package( OpenCV CONFIG REQUIRED )
 
-add_executable(ConsoleVideo ConsoleVideo.cpp "../source/Console.cpp"  "../source/Shape.cpp" "../source/TextVideo.cpp")
+add_executable(ConsoleVideo ConsoleVideo.cpp "../source/Console.cpp"  "../source/Shape.cpp" "../source/TextVideo.cpp" "FileExplorer.cpp")
 
+add_executable(ConwayGameOfLife ConwayGameOfLife.cpp "../source/Console.cpp" "../source/Shape.cpp")
 
 target_link_libraries(ConsoleVideo
     PRIVATE
@@ -16,3 +17,5 @@ target_link_libraries(ConsoleVideo
     opencv_core
     opencv_highgui
 )
+
+add_executable(FileExplorer FileExplorer.cpp)
