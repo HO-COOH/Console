@@ -79,7 +79,7 @@ public:
 
     /*Console configuration functions*/
     Console();
-    Console(short width, short height, short fontWidth, short fontHeight);
+    Console& resetConsole(short width, short height, short fontWidth, short fontHeight);
     void printConsoleInfo() const;
     auto getWidth() const { return width; }
     auto getHeight() const { return height; }

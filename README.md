@@ -107,10 +107,8 @@ void VideoTest()
 }
 ```
 - A single-video-single-window demo
-  + [(China) GrayScale Video Demo](https://www.bilibili.com/video/BV1aK411p7hJ)
-  + [(China) Colored Video Demo](https://www.bilibili.com/video/BV165411Y7w6)
-  + [(Non China) GrayScale Video Demo](https://www.youtube.com/watch?v=0b1pUuar8Fc&t=151s)
-  + [(Non China) Colored Video Demo](https://www.youtube.com/watch?v=9k3mMGZGRz4)
+  + GrayScale Video Demo [China](https://www.bilibili.com/video/BV1aK411p7hJ) [Non China](https://www.youtube.com/watch?v=0b1pUuar8Fc&t=151s)
+  + Colored Video Demo [China](https://www.bilibili.com/video/BV165411Y7w6) [Non China](https://www.youtube.com/watch?v=9k3mMGZGRz4)
 - A multi-video-single-window demo
 ### PictureEngine
 

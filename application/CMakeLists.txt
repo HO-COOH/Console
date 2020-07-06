@@ -5,6 +5,8 @@ add_executable(ConsoleVideo ConsoleVideo.cpp "../source/Console.cpp"  "../source
 
 add_executable(ConwayGameOfLife ConwayGameOfLife.cpp "../source/Console.cpp" "../source/Shape.cpp")
 
+add_executable(CMatrix CMatrix.cpp "../source/Console.cpp")
+
 target_link_libraries(ConsoleVideo
     PRIVATE
     opencv_ml

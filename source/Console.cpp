@@ -87,14 +87,10 @@ Console::Console()
         constructSecondaryConsole();
 }
 
-Console::Console(short width, short height, short fontWidth, short fontHeight)
+Console& Console::resetConsole(short width, short height, short fontWidth, short fontHeight)
 {
-    is_std = (count++ == 0);
-
     if (is_std)
     {
-        /*construct the console window of specified size*/
-        hTerminal = GetStdHandle(STD_OUTPUT_HANDLE);
         SMALL_RECT windowSize{ 0,0,width - 1, height - 1 };
         //If the function fails return value is 0
         if (!SetConsoleWindowInfo(hTerminal, true, &windowSize))

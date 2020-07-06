@@ -7,12 +7,12 @@ class ConsoleEngine
 private:
     short width;
     short height;
-    BufferObject buffer;
     Console* ptr;
     bool wcharMode;
     mutable std::mutex mut;
     bool multiThreadingMode = false;
 public:
+    BufferObject buffer;
     ConsoleEngine(Console& window, bool wcharMode=false) :width(window.getWidth()), height(window.getHeight()), buffer(height, width), ptr(&window), wcharMode(wcharMode) 
     {
         CHAR_INFO init;
