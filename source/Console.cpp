@@ -9,12 +9,12 @@ void Console::constructSecondaryConsole()
     hTerminal = CreateNamedPipeA(
         R"(\\.\pipe\Console)", //the unique pipe name
         PIPE_ACCESS_OUTBOUND,  //mode: write to the pipe [DUPLEX] for bi-direction, [INBOUND] for reading
-        PIPE_TYPE_BYTE |       //[BYTE]: wriiten as a stream by bytes, [MESSAGE]: written as a stream of message,
+        PIPE_TYPE_BYTE |       //[BYTE]: written as a stream by bytes, [MESSAGE]: written as a stream of message,
         PIPE_READMODE_BYTE |
         PIPE_WAIT, //operate as blocking mode, [NO_WAIT] as non-blocking
         2,             //maximum number of instances that can be created for this pipe
         7200,          //bytes reserve for output buffer
-        0,             //bytes for the inoput buffer
+        0,             //bytes for the input buffer
         1,
         nullptr //a pointer to a [SECURITY_ATTRIBUTES] struct
     );
@@ -75,8 +75,8 @@ void Console::constructStdConsole()
     width = screen_buffer_info.srWindow.Right - screen_buffer_info.srWindow.Left + 1;
     height = screen_buffer_info.srWindow.Bottom - screen_buffer_info.srWindow.Top + 1;
     default_attrib = screen_buffer_info.wAttributes;
-    current_background_color = default_attrib & static_cast<WORD>(BackgroundColor::WHITE);
-    current_foreground_color = default_attrib & static_cast<WORD>(Color::WHITE);
+    current_background_color = { BackgroundColor::DEFAULT, false };
+    current_foreground_color = { Color::WHITE, false };
 #else
     getmaxyx(hTerminal, height, width);
 #endif
@@ -92,7 +92,10 @@ Console::Console()
 #else
         initscr();
         hTerminal = stdscr;
-        start_color();
+        if (!has_colors())
+            printw("Error: Your console doesn't support color!\n");
+        else
+            start_color();
 #endif
         constructStdConsole();
     }
@@ -138,7 +141,7 @@ Console& Console::resetConsole(short width, short height, short fontWidth, short
         constructSecondaryConsole();    //TODO: enable same functionality to the secondary console window
 }
 
-void Console::printConsoleInfo() const
+void Console::printConsoleInfo()
 {
     if(is_std)  
     {
@@ -155,7 +158,7 @@ void Console::printConsoleInfo() const
 #else
         COORD cursorPos;
         getyx(hTerminal, cursorPos.y, cursorPos.x);
-        std::cout
+        *this
             << "Cursor Pos: " << cursorPos.x << ", " << cursorPos.y << '\n'
             << "Window Size: " << width << ", " << height << '\n';
 #endif
@@ -167,36 +170,35 @@ void Console::printConsoleInfo() const
 Console& Console::set(Color color, bool intensify)
 {
     if (color == Color::NOCHANGE)
-        return *this;
-#ifdef WINDOWS    
-    current_foreground_color = static_cast<WORD>(color);
+        return *this;  
+    current_foreground_color.first = color;
     if (intensify)
-        current_foreground_color |= FOREGROUND_INTENSITY;
+        current_foreground_color.second = true;
 
-    setColor(current_background_color | current_foreground_color);
-#else
-    init_pair(1, static_cast<short>(color), static_cast<short>(current_background_color));
-    attron(COLOR_PAIR(1));
-    current_foreground_color = static_cast<short>(color);
-#endif
+    setColor();
     return *this;
+}
+
+Console& Console::set(std::pair<Color, bool> color)
+{
+    set(color.first, color.second);
+}
+
+Console& Console::set(std::pair<BackgroundColor, bool> bgColor)
+{
+    set(bgColor.first, bgColor.second);
 }
 
 Console& Console::set(BackgroundColor bgColor, bool intensify)
 {
     if (bgColor == BackgroundColor::NOCHANGE)
         return *this;
-#ifdef WINDOWS
-    current_background_color = static_cast<WORD>(bgColor);
+    current_background_color.first = bgColor;
     if (intensify)
-        current_background_color |= BACKGROUND_INTENSITY;
+        current_background_color.second = true;
 
-    setColor(current_foreground_color | static_cast<WORD>(current_background_color));
-#else
-    init_pair(1, static_cast<short>(current_foreground_color), static_cast<short>(bgColor));
-    attron(COLOR_PAIR(1));
-    current_background_color = static_cast<short>(bgColor);
-#endif
+    setColor();
+
     return *this;
 }
 
@@ -380,7 +382,7 @@ void Console::clear()
     FillConsoleOutputCharacter(hTerminal, ' ', width * height, { 0,0 }, &actual_written);
     SetConsoleCursorPosition(hTerminal, { 0,0 });
 #else
-
+    fill({ 0,0 }, { width, height });
 #endif
 }
 

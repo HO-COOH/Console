@@ -1,8 +1,15 @@
 # Console
- Simple Windows Console wrapper with easy-to-use APIs and drawing functionality. The project is focused on sweet syntax and expressive code.
+
+ Simple **Windows & Ncurses** Console wrapper with easy-to-use APIs and drawing functionality. The project is focused on sweet syntax, without ugly types and pointers nonsense.
+
+**!Still very early in development!**
+
 ## Description
+
 The original implementation was used in [Simple TCP chatroom Client](https://github.com/HO-COOH/CS7850/tree/master/Project/V2). And as I was developing that project, I found out that just wrapping up the native Win32 console APIs is far from enough. Therefore I make it as a new project. 
+
 ## How to use
+
 Compile time polymorphism is given higher priority. But I tried to make it easy to use.
 
 **``console`` is a global object that is guaranteed to initialized first before you use, so no need to construct it anymore if you only use one console window**
@@ -10,6 +17,7 @@ Compile time polymorphism is given higher priority. But I tried to make it easy 
 In the future, runtime polymorphism will be considered.
 
 An example of using ``Console`` class.
+
 ```cpp
 void TestConsole()
 {
@@ -29,7 +37,7 @@ void TestConsole()
     console.moveCursorTo({ 20,10 });
     console << "Text start at [20,10]\n";
     console.moveCursorTo(MIDDLE{});
-    
+
     /*Erase one line or clear the whole window */
     console << "Press enter to delete this line: ";
     std::cin.get();
@@ -61,18 +69,25 @@ int main()
 ```
 
 ## Modules
-The project consists of these following easy-to-use elements. 
+
 ### Console
-You already seen above.
+
+Windows ConsoleAPI & ncurses wrapper. ``./include/Console.h``
+
 ### ConsoleEngine
-You already seen above.
+
+Take ownership of the console and draw stuff. ``./include/ConsoleEngine.h``
+
 ### GUI Elements
+
 All GUI elements are inherited from ``RectangleArea``.
+
 - TextBox
 - ScrollArea
 - ProgressBar
 
 GUI library is written with code reusability in mind. They work great not only with ``ConsoleEngine``, but also with your ordinary ``std::cout`` or ``std::wcout``, meaning that you can reuse them without engaging with ``ConsoleEngine`` in your own project, freeing you from re-implementing basic GUI elements in the Console.
+
 ```cpp
 #include "Shape.h"
 ProgressBar bar{20, 1};
@@ -81,6 +96,7 @@ std::cout << bar << '\n';
 ```
 
 ### VideoEngine
+
 ```cpp
 #include <ConsoleEngine.h>
 #include <VideoEngine.h>
@@ -89,38 +105,38 @@ void VideoTest()
     ConsoleEngine engine{console};
     /*Play a single video*/
     {
-        auto video = engine.add<VideoEngine>();
+        auto video = engine.add<Video>();
         video.load("SomeFile.mp4");
-        video.play();
+        video.play(30);//play at 30 fps
     }
     /*Or use multithreading to play multiple videos at once*/
     {
         auto [videoFrameLeft, videoFrameRight]=engine.divide(RectangleArea::Vertical);
-        auto videoLeft = videoFrameLeft.add<VideoEngine>();
-        auto videoRight = videoDrameRight.add<VideoEngine>();
+        auto videoLeft = videoFrameLeft.add<Video>(engine);
+        auto videoRight = videoDrameRight.add<Video>(engine);
         videoLeft.load("SomeFile.mp4");
         videoRight.load("AnotherFile.mp4");
-        std::thread t[2]{videoLeft.play(), videoRAight.play()};
-        for(auto& thread: t)
-            thread.join();
+        VideoEngine{ {videoLeft, videoRight} };//play 2 videos
     }
 }
 ```
+
 - A single-video-single-window demo
   + GrayScale Video Demo [China](https://www.bilibili.com/video/BV1aK411p7hJ) [Non China](https://www.youtube.com/watch?v=0b1pUuar8Fc&t=151s)
   + Colored Video Demo [China](https://www.bilibili.com/video/BV165411Y7w6) [Non China](https://www.youtube.com/watch?v=9k3mMGZGRz4)
 - A multi-video-single-window demo
-### PictureEngine
-
+  
+  ### PictureEngine
 
 ## Plan To-Do
+
 - One console (std handle) √
 - Colors √
-- Able to create multiple console windows (so change originally ``static`` functions to ``non-static``)
+- Able to create multiple console windows~~(so change originally ``static`` functions to ``non-static``)~~
 - Drawing functionality
-    + borders √
-    + Text region
-    + Scroll View (automatic scrolling text region)
-    + Progress bar
-    + Forms
+  + borders √
+  + Text region
+  + Scroll View (automatic scrolling text region)
+  + Progress bar
+  + Forms
 - Keyboard events √×(partially)

@@ -43,7 +43,7 @@ void VideoTestDual(std::string const& file1, std::string const& file2)
     //v_DownRight.load("test.mp4");
     v_left.load(currentDir + file1);
     v_right.load(currentDir + file2);
-    VideoEngine videos{ std::vector{&v_left, &v_right} };
+    VideoEngine{ {v_left, v_right} };
 }
 
 void VideoTestQuad(std::string const& file1, std::string const& file2, std::string const& file3, std::string const& file4)
@@ -71,7 +71,7 @@ void VideoTestQuad(std::string const& file1, std::string const& file2, std::stri
     v_UpRight.load(currentDir + file2);
     v_DownLeft.load(currentDir + file3);
     v_DownRight.load(currentDir + file4);
-    VideoEngine videos{ std::vector{&v_UpLeft, &v_DownLeft, &v_UpRight, &v_DownRight} };
+    VideoEngine{ {v_UpLeft, v_DownLeft, v_UpRight, v_DownRight} };
 }
 
 void PictureTest()

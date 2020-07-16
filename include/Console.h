@@ -23,6 +23,12 @@ enum class Color {
     WHITE = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
     NOCHANGE
 };
+//
+//struct Color
+//{
+//    WORD value;
+//    static inline Color BLACK{2};
+//};
 
 enum class BackgroundColor {
     RED = BACKGROUND_RED, GREEN = BACKGROUND_GREEN, BLUE = BACKGROUND_BLUE,
@@ -45,6 +51,7 @@ inline std::unordered_map<FunctionKey, int> KeyCode {
 
 #include <ncurses.h>
 #include <sstream>
+#include <utility>
 #define WORD int
 #define HANDLE WINDOW*
 enum class Color
@@ -81,6 +88,17 @@ struct CHAR_INFO
     WORD Attributes;
 };
 
+namespace std
+{
+    template<>
+    struct hash<std::pair<Color, BackgroundColor>>
+    {
+        size_t operator()(std::pair<Color, BackgroundColor> const& key) const
+        {
+            return static_cast<size_t>(key.first)<<8 | static_cast<size_t>(key.second);
+        }
+    };
+}
 
 #endif
 
@@ -103,22 +121,46 @@ enum class Shade:wchar_t {
 
 
 class Console
-{   
-private:    
+{     
     static inline int count = 0;
     bool is_std;
     HANDLE hTerminal;
     short width;
     short height;
     WORD default_attrib;
-    WORD current_background_color;
-    WORD current_foreground_color;
-#ifdef WINDOWS
-    void setColor(WORD color);
-#endif
+    std::pair<BackgroundColor, bool> current_background_color;
+    std::pair<Color, bool> current_foreground_color;
+
+    void setColor();
     void sendPipe(std::string_view msg) const;
     void constructSecondaryConsole();
     void constructStdConsole();
+
+
+#ifdef LINUX
+    /*
+        This is a color_pair index cache for ncurses
+        Due to the limitation, if you do:
+            initscr();
+            start_color();
+            init_pair(1, COLOR_RED, COLOR_GREEN);
+            attron(COLOR_PAIR(1));
+            printw("Red text + Green back\n");      //
+            refresh();
+            attroff(COLOR_PAIR(1));
+            init_pair(1, COLOR_GREEN, COLOR_WHITE);
+            attron(COLOR_PAIR(1));
+            printw("Green text + white back\n");    //this will change the previously printed text too
+        And you can't just incrementing the color index every time to change the current color,
+        because there will be a maximum limit of number of color pairs
+
+        So that each time a new color_pair is created, it needs to be added to this cache, without constantly creating new pair of colors
+        And a color index can be retrieved with: colorIndex[{Color::RED, BackgroundColor::WHITE}]
+        And use the existing color pair with: attron(COLOR_PAIR(colorIndex[{Color::RED, BackgroundColor::WHITE}];
+     */
+    std::unordered_map<std::pair<Color, BackgroundColor>, int> colorIndex;
+#endif
+
 public:
 
 #ifdef WINDOWS
@@ -133,7 +175,7 @@ public:
     /*Console configuration functions*/
     Console();
     Console& resetConsole(short width, short height, short fontWidth, short fontHeight);
-    void printConsoleInfo() const;
+    void printConsoleInfo();
     auto getWidth() const { return width; }
     auto getHeight() const { return height; }
 
@@ -155,16 +197,20 @@ public:
 
     /*Read console functions*/
     template<typename T>
-    T read(const char* prompt="");
+    T read(const char* prompt = nullptr, bool reprompt = true);
 
     /*Write console functions*/
     Console& operator<<(Color color);
     Console& operator<<(BackgroundColor bgColor);
+    Console& set(Color color=Color::NOCHANGE, bool intensify=true);
+    Console& set(std::pair<Color, bool> color);
+    Console& set(BackgroundColor bgColor=BackgroundColor::NOCHANGE, bool intensify=false);
+    Console& set(std::pair<BackgroundColor, bool> bgColor);
+    void changeWindowColor(BackgroundColor bgColor);
+
     template <typename T>
     Console& operator<<(T&& arg);
-    Console& set(Color color=Color::NOCHANGE, bool intensify=true);
-    Console& set(BackgroundColor bgColor=BackgroundColor::NOCHANGE, bool intensify=true);
-    void changeWindowColor(BackgroundColor bgColor);
+
     template<typename T>
     Console& writeln(const T& arg, Color color=Color::NOCHANGE);
     Console& putchar(char c, size_t count = 1);
@@ -182,13 +228,33 @@ public:
     ~Console();
 };
 
-#ifdef WINDOWS
-inline void Console::setColor(WORD color)
+
+inline void Console::setColor()
 {
-    if (!SetConsoleTextAttribute(hTerminal, color))
-        MessageBox(NULL, TEXT("SetConsoleTextAttributeError"), TEXT("Error"), MB_OK);
-}
+#ifdef WINDOWS
+    WORD attrib = static_cast<WORD>(current_foreground_color.first) | static_cast<WORD>(current_background_color.first);
+    if (current_foreground_color.second)
+        attrib |= FOREGROUND_INTENSITY;
+    if (current_background_color.second)
+        attrib |= BACKGROUND_INTENSITY;
+    if (!SetConsoleTextAttribute(hTerminal, attrib))
+        LOG("SetConsoleTextAttributeError");
+#else
+    static int i = 1;
+    if (auto iter = colorIndex.find({ current_foreground_color.first, current_background_color.first }); iter != colorIndex.end())
+        attron(COLOR_PAIR(iter->second));
+    else
+    {
+        colorIndex[{current_foreground_color.first, current_background_color.first}] = i;
+        init_pair(i, static_cast<short>(current_foreground_color.first), static_cast<short>(current_background_color.first));
+        attron(COLOR_PAIR(i));
+        i++;
+    }
+    if (current_foreground_color.second)
+        attron(A_BOLD);
 #endif
+}
+
 
 inline void Console::sendPipe(std::string_view msg) const
 {
@@ -201,6 +267,7 @@ inline void Console::sendPipe(std::string_view msg) const
         CloseHandle(hTerminal);
     }
 #else
+    //TODO:
 #endif
 }
 
@@ -227,6 +294,7 @@ Console& Console::operator<<(T&& arg)
     std::stringstream ss;
     ss << arg;
     printw(ss.str().c_str());
+    refresh();
 #endif
     return *this;
 }
@@ -335,12 +403,13 @@ inline void Console::beep(int frequency, int duration) const
 }
 
 template<typename T>
-T Console::read(const char* prompt)
+T Console::read(const char* prompt, bool reprompt)
 {
 #ifdef WINDOWS
     T i;
     do {
-        std::cout << prompt;
+        if(prompt)
+            std::cout << prompt;
         auto pos = getCursorPos();
         if (!std::cin)
         {
@@ -354,9 +423,16 @@ T Console::read(const char* prompt)
 #else
     T i;
     do{
-        printw(prompt);
+        if(prompt)
+            printw(prompt);
         auto pos = getCursorPos();
-
+        std::stringstream ss;
+        char c;
+        while ((c = getch()) != '\n')
+            ss << c;
+        ss >> i;
+        if (ss)
+            break;
     } while (true);
 #endif
 }
@@ -381,7 +457,16 @@ Console& Console::writeln(const T& arg, Color color)
             std::cerr << "Get console screen buffer info failed!\n";
     }
 #else
-
+    if (color == Color::NOCHANGE)
+        *this << arg << '\n';
+    else
+    {
+        auto oldColor = current_foreground_color;
+        set(color);
+        *this << arg << '\n';
+        set(oldColor);
+    }
+    refresh();
 #endif
     return *this;
 }

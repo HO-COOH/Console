@@ -99,14 +99,33 @@
 //    eng.draw();
 //}
 
-#ifndef WINDOWS
-#include <ncurses.h>
+
 #include "Console.h"
 #include <iostream>
 
-
-int main(int argc, char *argv[])
+#ifdef LINUX
+void test()
 {
+    initscr();
+    start_color();
+    init_pair(1, COLOR_RED, COLOR_GREEN);
+    attron(COLOR_PAIR(1));
+    printw("RED text + Green back\n");
+    refresh();
+    //attroff(COLOR_PAIR(1));
+    init_pair(2, COLOR_GREEN, COLOR_WHITE);
+    attron(COLOR_PAIR(2));
+    attron(A_BOLD);
+    printw("Green text + white back\n");
+    refresh();
+    getch();
+    endwin();
+}
+#endif
+
+void test2()
+{
+    console.printConsoleInfo();
     /*Setting text color using familiar syntax */
     console << Color::RED << "This is a red text on black background\n";
     /*Or use traditional member function*/
@@ -130,4 +149,11 @@ int main(int argc, char *argv[])
     std::cin.get();
     console.clear();
 }
-#endif
+int main(int argc, char *argv[])
+{
+    //test();
+
+    test2();
+}
+
+

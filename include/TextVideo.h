@@ -75,63 +75,9 @@ public:
     unsigned int getFrameRate();
 };
 
-//#include <queue>
-//namespace internal
-//{
-//    class VideoEvent
-//    {
-//        mutable std::mutex mut;
-//        unsigned event_counter{ 0 };
-//        std::condition_variable data_cond;
-//        unsigned m_count;
-//    public:
-//        VideoEvent(unsigned count):m_count(count) {}
-//        void push(bool flag)
-//        {
-//            {
-//                std::lock_guard lk{ mut };
-//                ++event_counter;
-//            }
-//            data_cond.notify_one();
-//        }
-//        void wait_and_pop()
-//        {
-//            std::unique_lock lk{ mut };
-//            data_cond.wait(lk, [&] {return event_counter>=m_count; });
-//            event_counter = 0;
-//            data_cond.notify_all();
-//        }
-//        void wait_for_empty()
-//        {
-//            std::unique_lock lk{ mut };
-//            data_cond.wait(lk, [&] {return event_counter == 0; });
-//            data_cond.notify_all();
-//        }
-//    };
-//}
-
-//#include <stack>
-//class VideoEngine
-//{
-//    ConsoleEngine& m_engine;
-//    std::vector<std::thread> m_instances;
-//    
-//    std::shared_mutex ready_mutex;
-//    std::condition_variable_any ready_cond;
-//
-//    std::shared_mutex drawing_mutex;
-//    std::condition_variable_any drawing_cond;
-//
-//    std::deque<std::atomic_bool> finished_flags;
-//
-//    void draw();
-//    bool is_all_finished() const;
-//public:
-//    VideoEngine(std::vector<Video*> instances);
-//    ~VideoEngine();
-//};
 
 #include <atomic>
+#include <functional>
 class VideoEngine
 {
     ConsoleEngine& m_engine;
@@ -145,7 +91,7 @@ class VideoEngine
     void draw();
     bool is_all_finished() const;
 public:
-    VideoEngine(std::vector<Video*> instances);
+    VideoEngine(std::vector<std::reference_wrapper<Video>> instances);
     ~VideoEngine();
 };
 

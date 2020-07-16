@@ -53,14 +53,13 @@ static inline std::pair<Shade, float> getShade(Color_T pixel)
     const auto lightness = pixel.getIntensity();
     if (lightness <= 0.2)
         return { Shade::None,0.0f };
-    else if (lightness <= 0.4)
+    if (lightness <= 0.4)
         return { Shade::Light, 0.25f };
-    else if (lightness <= 0.6)
+    if (lightness <= 0.6)
         return { Shade::Medium, 0.5f } ;
-    else if (lightness <= 0.8)
+    if (lightness <= 0.8)
         return { Shade::Dark, 0.75f };
-    else
-        return { Shade::Full, 1.0f };
+    return { Shade::Full, 1.0f };
 }
 
 static inline CHAR_INFO to_text(const Color_T pixel)
@@ -208,12 +207,12 @@ bool VideoEngine::is_all_finished() const
      return true;
 }
 
-VideoEngine::VideoEngine(std::vector<Video*> instances): m_engine(instances.front()->m_engine), finishedFlags(instances.size())
+VideoEngine::VideoEngine(std::vector<std::reference_wrapper<Video>> instances): m_engine(instances.front().get().m_engine), finishedFlags(instances.size())
 {
     unsigned id = 0;
     for (auto instance : instances)
     {
-        if (instance->is_ready)
+        if (instance.get().is_ready)
         {
             finishedFlags[id] = false;
             m_instances.emplace_back
@@ -221,7 +220,7 @@ VideoEngine::VideoEngine(std::vector<Video*> instances): m_engine(instances.fron
                 [&, instance]
                 {
                     auto m_id = id;
-                    cv::VideoCapture video{ instance->m_fileName };
+                    cv::VideoCapture video{ instance.get().m_fileName };
                     cv::Mat frame, resized;
                     ScopedTimer t{ static_cast<unsigned int>(1.0 / 30 * 1000 * 1000) }; //refactor here
                     while (true)
@@ -229,16 +228,16 @@ VideoEngine::VideoEngine(std::vector<Video*> instances): m_engine(instances.fron
                         video >> frame;
                         if (frame.empty())
                             break;
-                        cv::resize(frame, resized, { instance->width, instance->height });
+                        cv::resize(frame, resized, { instance.get().width, instance.get().height });
                    
                         {
                             drawing_mutex.lock_shared();
-                            for (auto i = 0; i < instance->height; ++i)
+                            for (auto i = 0; i < instance.get().height; ++i)
                             {
-                                for (auto j = 0; j < instance->width; ++j)
+                                for (auto j = 0; j < instance.get().width; ++j)
                                 {
                                     auto pixel = resized.at<cv::Vec3b>(i, j);
-                                    instance->at(i, j) = to_text(Color_T{ pixel[2], pixel[1], pixel[0] });
+                                    instance.get().at(i, j) = to_text(Color_T{ pixel[2], pixel[1], pixel[0] });
                                 }
                             }
                             drawing_mutex.unlock_shared();
