@@ -1,4 +1,5 @@
 # Find Package
+if(MSVC)
 find_package( OpenCV CONFIG REQUIRED )
 
 add_executable(ConsoleVideo ConsoleVideo.cpp "../source/Console.cpp"  "../source/Shape.cpp" "../source/TextVideo.cpp" "FileExplorer.cpp")
@@ -6,6 +7,8 @@ add_executable(ConsoleVideo ConsoleVideo.cpp "../source/Console.cpp"  "../source
 add_executable(ConwayGameOfLife ConwayGameOfLife.cpp "../source/Console.cpp" "../source/Shape.cpp")
 
 add_executable(CMatrix CMatrix.cpp "../source/Console.cpp")
+
+add_executable(CacheVisualization CacheVisualization.cpp "../source/Console.cpp" "../source/Shape.cpp")
 
 target_link_libraries(ConsoleVideo
     PRIVATE
@@ -21,3 +24,5 @@ target_link_libraries(ConsoleVideo
 )
 
 add_executable(FileExplorer FileExplorer.cpp)
+
+endif()

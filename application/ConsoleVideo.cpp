@@ -103,6 +103,11 @@ inline void printUsage()
     )";
 }
 
+void test()
+{
+    VideoTestDual("test.mp4", "test2.mp4");
+}
+
 int main(int argc, char** argv)
 {
     const auto argCount = argc - 1;

@@ -23,6 +23,22 @@
             "ctestCommandArgs": "",
             "inheritEnvironments": [ "msvc_x64_x64" ],
             "variables": []
+        },
+        {
+            "name": "WSL-GCC-Debug",
+            "generator": "Ninja",
+            "configurationType": "Debug",
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "cmakeExecutable": "/usr/bin/cmake",
+            "cmakeCommandArgs": "-DCMAKE_TOOLCHAIN_FILE=/home/peter/vcpkg/scripts/buildsystems/vcpkg.cmake",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
+            "inheritEnvironments": [ "linux_x64" ],
+            "wslPath": "${defaultWSLPath}",
+            "addressSanitizerRuntimeFlags": "detect_leaks=0",
+            "variables": [],
+            "cmakeToolchain": ""
         }
     ]
 }

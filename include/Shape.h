@@ -10,20 +10,36 @@
 class Drawable
 {
 protected:
+    BufferObject& buffer;
     short width;
     short height;
-    BufferObject& buffer;
     short starting_row;
     short starting_col;
     char& operator()(short row, short col)const { return buffer(row+starting_row, col+starting_col).Char.AsciiChar;}
     CHAR_INFO& at(short row, short col) const { return buffer(row + starting_row, col + starting_col); }
     //auto begin() { return BufferObject::BufferObjectIterator{ &at(0,0) }; }
     //auto end() { return BufferObject::BufferObjectIterator{ &at(height, width) }; }
+    void fill(char c, Color color, BackgroundColor bg=BackgroundColor::DEFAULT)
+    {
+        CHAR_INFO fillChar;
+        fillChar.Char.AsciiChar = c;
+        fillChar.Attributes = static_cast<WORD>(color) | static_cast<WORD>(bg);
+        for (auto i = 0; i < height; ++i)
+            std::fill(BufferObject::BufferObjectIterator{ &at(i,0) }, BufferObject::BufferObjectIterator{ &at(i, width) }, fillChar);
+    }
+    void fill(wchar_t c, Color color, BackgroundColor bg = BackgroundColor::DEFAULT)
+    {
+        CHAR_INFO fillChar;
+        fillChar.Char.UnicodeChar = c;
+        fillChar.Attributes = static_cast<WORD>(color) | static_cast<WORD>(bg);
+        for (auto i = 0; i < height; ++i)
+            std::fill(BufferObject::BufferObjectIterator{ &at(i,0) }, BufferObject::BufferObjectIterator{ &at(i, width) }, fillChar);
+    }
 public:
-    Drawable(short width, short height, BufferObject& buffer, short starting_row, short starting_col)
-        :   width(width),
+    Drawable(BufferObject& buffer, short width, short height,  short starting_row, short starting_col)
+        :   buffer(buffer),
+            width(width),
             height(height),
-            buffer(buffer),
             starting_row(starting_row),
             starting_col(starting_col) { }
     void setColor(Color color, bool text_intensify = true, BackgroundColor bgColor = BackgroundColor::DEFAULT, bool bg_intensity = false);
@@ -81,8 +97,8 @@ public:
         Vertical
     };
 
-    RectangleArea(short width, short height, BufferObject& buffer, short starting_row, short starting_col)
-        : Drawable(width, height, buffer, starting_row, starting_col) { }
+    RectangleArea(BufferObject& buffer, short width, short height,  short starting_row, short starting_col)
+        : Drawable(buffer, width, height, starting_row, starting_col) { }
     
     std::pair<RectangleArea, RectangleArea> divide(Divisor d, short pos, char divisor=0);
     
@@ -95,14 +111,14 @@ public:
     }
 
     template<typename Widget, typename...Args>
-    Widget add(Args&&... args) { return Widget{getUsableWidth(), getUsableHeight(), buffer, starting_row+startRow(), starting_col+startCol(), args...}; }
+    Widget add(Args&&... args) { return Widget{buffer, getUsableWidth(), getUsableHeight(), starting_row+startRow(), starting_col+startCol(), args...}; }
 
 };
 
 class TextBox: public RectangleArea
 {
 public:
-    TextBox(short width, short height, BufferObject& buffer, short starting_row, short starting_col) : RectangleArea(width, height, buffer, starting_row, starting_col) {}
+    TextBox(BufferObject& buffer, short width, short height,  short starting_row, short starting_col) : RectangleArea(buffer, width, height, starting_row, starting_col) {}
     void setText(std::string const& text);
 };
 
@@ -111,7 +127,7 @@ class ScrollView: public RectangleArea
     std::deque<std::string> textQueue;
     void pop();
 public:
-    ScrollView(short width, short height, BufferObject& buffer, short starting_row, short starting_col):RectangleArea(width, height, buffer, starting_row, starting_col){}
+    ScrollView(BufferObject& buffer, short width, short height, short starting_row, short starting_col):RectangleArea(buffer, width, height, starting_row, starting_col){}
     void push(std::string&& text) { textQueue.push_back(std::move(text)); pop(); }
     void draw() const override;
 };
@@ -125,8 +141,8 @@ class ProgressBar:public RectangleArea
    short m_percent = 0;
    bool show_percentage = true;
 public:
-   ProgressBar(short width, short height, BufferObject &buffer, short starting_row, short starting_col)
-       : RectangleArea(width, height, buffer, starting_row, starting_col) {}
+   ProgressBar(BufferObject &buffer, short width, short height, short starting_row, short starting_col)
+       : RectangleArea(buffer, width, height, starting_row, starting_col) {}
 
    void setPercentage(short percent)
    {
@@ -147,8 +163,8 @@ private:
     short m_rows = 1;
     short m_cols = 1;
 public:
-    Form(short width, short height, BufferObject& buffer, short starting_row, short starting_col)
-        : RectangleArea(width, height, buffer, starting_row, starting_col) {}
+    Form(BufferObject& buffer, short width, short height, short starting_row, short starting_col)
+        : RectangleArea(buffer, width, height, starting_row, starting_col) {}
 
     /**
      * @brief: Set the size of the forms, size is including the heading rows 
@@ -162,8 +178,8 @@ public:
     class FormCell :public RectangleArea
     {
     public:
-        FormCell(short width, short height, BufferObject& buffer, short starting_row, short starting_col)
-            :RectangleArea(width, height, buffer, starting_row, starting_col) {}
+        FormCell(BufferObject& buffer, short width, short height, short starting_row, short starting_col)
+            :RectangleArea(buffer, width, height, starting_row, starting_col) {}
         
         void setText(std::string_view text);
     };

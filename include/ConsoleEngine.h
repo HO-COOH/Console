@@ -43,38 +43,40 @@ public:
         }
     }
 
-    template <typename ToDraw>
-    ToDraw add(short width, short height, short x, short y)
+    template <typename ToDraw, typename... Args>
+    ToDraw add(short width, short height, short x, short y, Args&&... args)
     {
-        return ToDraw{width, height, buffer, y, x};
+        const auto w = min(width, this->width);
+        const auto h = min(height, this->height);
+        return ToDraw{ buffer, w, h, min(y, this->height - h) , min(x, this->width - w), args... };
     }
 
-    template<typename ToDraw>
+    template<typename ToDraw, typename... Args>
     ToDraw add()
     {
-        return ToDraw{ width, height, buffer, 0, 0 };
+        return ToDraw{buffer, width, height,  0, 0 };
     }
 
     /*Specialization*/
     template<>
     Video add()
     {
-        return Video{ width, height, buffer, 0 ,0, *this };
+        return Video{ buffer, width, height, 0 ,0, *this };
     }
     template <>
     Video add(short width, short height, short x, short y)
     {
-        return Video{ width, height, buffer, y, x, *this };
+        return Video{ buffer, width, height, y, x, *this };
     }
     template<>
     PictureEngine add()
     {
-        return PictureEngine{ width, height, buffer, 0 ,0, *this };
+        return PictureEngine{ buffer, width, height, 0 ,0, *this };
     }
     template <>
     PictureEngine add(short width, short height, short x, short y)
     {
-        return PictureEngine{ width, height, buffer, y, x, *this };
+        return PictureEngine{buffer,  width, height, y, x, *this };
     }
 
     template<typename Left, typename Right>
@@ -82,13 +84,13 @@ public:
     {
         if (d == RectangleArea::Divisor::Horizontal)
             return{
-            Left{pos, height, buffer, 0, 0},
-            Right{width - pos - 1, height, buffer, 0, pos + 1}
+            Left{buffer, pos, height, 0, 0},
+            Right{buffer, width - pos - 1, height, 0, pos + 1}
         };
         else    //vertical divisor
             return {
-            Left{width, pos, buffer, 0, 0},
-            Right{width, height - pos - 1, buffer, pos + 1, 0}
+            Left{buffer, width, pos, 0, 0},
+            Right{buffer, width, height - pos - 1, pos + 1, 0}
         };
     }
 

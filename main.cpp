@@ -1,61 +1,59 @@
-﻿#include "TextVideo.h"
-#include <iostream>
-#include "Shape.h"
-#include "Console.h"
-#include "ConsoleEngine.h"
-#include <thread>
-#include <atomic>
-
-
-
-
-void TestEngine()
-{
-    console.printConsoleInfo();
-    std::cin.get();
-    ConsoleEngine eng{console};
-    auto [left, right] = eng.add<RectangleArea>().divide(RectangleArea::Divisor::Vertical, 0);
-    auto [upper_left, bottom_left] = left.divide(RectangleArea::Divisor::Horizontal, 0);
-    auto [upper_right, bottom_right] = right.divide(RectangleArea::Divisor::Horizontal, 0);
-    
-    auto upper_left_bar = upper_left.add<ProgressBar>(); 
-    upper_left_bar.setPercentage(20); 
-    upper_left_bar.setColor(Color::RED);
-    /*auto upper_right_bar    =*/ upper_right.add<ProgressBar>().setPercentage(30);
-    /*auto bottom_left_bar    =*/ bottom_left.add<ProgressBar>().setPercentage(40);
-    /*auto bottom_right_bar   =*/ bottom_right.add<ProgressBar>().setPercentage(50);
-    
-
-    eng.draw();
-    std::cin.get();
-}
-
-void TestConsole()
-{
-
-    /*Setting text color using familiar syntax */
-    console << Color::RED << "This is a red text on black background\n";
-    /*Or use traditional member function*/
-    console.set(Color::MAGENTA).writeln("This is magenta text");
-
-    /*Setting background color using the same syntax */
-    console << BackgroundColor::WHITE << "This is a magenta text on white background\n";
-    console.set(BackgroundColor::DEFAULT, false).set(Color::WHITE);
-
-    /*Moving cursor using relative or absolute position */
-    console.moveCursor(4, Direction::RIGHT);
-    console << "Indent text\n";
-    console.moveCursorTo({ 20,10 });
-    console << "Text start at [20,10]\n";
-    console.moveCursorTo(MIDDLE{});
-    
-    /*Erase one line or clear the whole window */
-    console  << "Press enter to delete this line: ";
-    std::cin.get();
-    console.eraseLine();
-    std::cin.get();
-    console.clear();
-}
+﻿//#include "TextVideo.h"
+//#include <iostream>
+//#include "Shape.h"
+//#include "Console.h"
+//#include "ConsoleEngine.h"
+//#include <thread>
+//#include <atomic>
+//
+//
+//void TestEngine()
+//{
+//    console.printConsoleInfo();
+//    std::cin.get();
+//    ConsoleEngine eng{console};
+//    auto [left, right] = eng.add<RectangleArea>().divide(RectangleArea::Divisor::Vertical, 0);
+//    auto [upper_left, bottom_left] = left.divide(RectangleArea::Divisor::Horizontal, 0);
+//    auto [upper_right, bottom_right] = right.divide(RectangleArea::Divisor::Horizontal, 0);
+//
+//    auto upper_left_bar = upper_left.add<ProgressBar>();
+//    upper_left_bar.setPercentage(20);
+//    upper_left_bar.setColor(Color::RED);
+//    /*auto upper_right_bar    =*/ upper_right.add<ProgressBar>().setPercentage(30);
+//    /*auto bottom_left_bar    =*/ bottom_left.add<ProgressBar>().setPercentage(40);
+//    /*auto bottom_right_bar   =*/ bottom_right.add<ProgressBar>().setPercentage(50);
+//
+//
+//    eng.draw();
+//    std::cin.get();
+//}
+//
+//void TestConsole()
+//{
+//
+//    /*Setting text color using familiar syntax */
+//    console << Color::RED << "This is a red text on black background\n";
+//    /*Or use traditional member function*/
+//    console.set(Color::MAGENTA).writeln("This is magenta text");
+//
+//    /*Setting background color using the same syntax */
+//    console << BackgroundColor::WHITE << "This is a magenta text on white background\n";
+//    console.set(BackgroundColor::DEFAULT, false).set(Color::WHITE);
+//
+//    /*Moving cursor using relative or absolute position */
+//    console.moveCursor(4, Direction::RIGHT);
+//    console << "Indent text\n";
+//    console.moveCursorTo({ 20,10 });
+//    console << "Text start at [20,10]\n";
+//    console.moveCursorTo(MIDDLE{});
+//
+//    /*Erase one line or clear the whole window */
+//    console  << "Press enter to delete this line: ";
+//    std::cin.get();
+//    console.eraseLine();
+//    std::cin.get();
+//    console.clear();
+//}
 
 //void TestColor()
 //{
@@ -75,37 +73,61 @@ void TestConsole()
 //    eng.draw();
 //}
 
+//void ScrollViewTest()
+//{
+//    ConsoleEngine eng{ console };
+//    auto canvas = eng.add<RectangleArea>();
+//    canvas.setBorder('U', 'D', 'L', 'R');
+//    auto [left, right] = canvas.divide(RectangleArea::Divisor::Vertical, 0);
+//    left.setBorder('1', '2', '3', '4');
+//    auto area = left.add<ScrollView>();
+//
+//    /*add text -> area*/
+//    area.push("Hello world1");
+//    area.push("Hello world1");
+//    area.push("Hello world1");
+//    area.push("Hello world1");
+//    area.push("Hello world1");
+//    area.push("Hello world1");
+//    area.push("Hello world1");
+//    area.push("Hello world1");
+//    area.push("A long text that needs two line to display ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+//    area.push("Hello world1");
+//
+//    area.draw();
+//
+//    eng.draw();
+//}
+
+#ifndef WINDOWS
+#include <ncurses.h>
+#include "Console.h"
+#include <iostream>
 
 
-
-void ScrollViewTest()
+int main(int argc, char *argv[])
 {
-    ConsoleEngine eng{ console };
-    auto canvas = eng.add<RectangleArea>();
-    canvas.setBorder('U', 'D', 'L', 'R');
-    auto [left, right] = canvas.divide(RectangleArea::Divisor::Vertical, 0);
-    left.setBorder('1', '2', '3', '4');
-    auto area = left.add<ScrollView>();
+    /*Setting text color using familiar syntax */
+    console << Color::RED << "This is a red text on black background\n";
+    /*Or use traditional member function*/
+    console.set(Color::MAGENTA).writeln("This is magenta text");
 
-    /*add text -> area*/
-    area.push("Hello world1");
-    area.push("Hello world1");
-    area.push("Hello world1");
-    area.push("Hello world1");
-    area.push("Hello world1");
-    area.push("Hello world1");
-    area.push("Hello world1");
-    area.push("Hello world1");
-    area.push("A long text that needs two line to display ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-    area.push("Hello world1");
+    /*Setting background color using the same syntax */
+    console << BackgroundColor::WHITE << "This is a magenta text on white background\n";
+    console.set(BackgroundColor::DEFAULT, false).set(Color::WHITE);
 
-    area.draw();
+    /*Moving cursor using relative or absolute position */
+    console.moveCursor(4, Direction::RIGHT);
+    console << "Indent text\n";
+    console.moveCursorTo({ 20,10 });
+    console << "Text start at [20,10]\n";
+    console.moveCursorTo(MIDDLE{});
 
-    eng.draw();
+    /*Erase one line or clear the whole window */
+    console << "Press enter to delete this line: ";
+    std::cin.get();
+    console.eraseLine();
+    std::cin.get();
+    console.clear();
 }
-int main(int argc, char** argv)
-{
-    VideoTestSingle();
-    //PictureTest();
-    //console.printConsoleInfo();
-}
+#endif

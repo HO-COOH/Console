@@ -70,8 +70,8 @@ std::pair<RectangleArea, RectangleArea> RectangleArea::divide(Divisor d, short p
         const short usable_height = height - (up == ' ' ? 0 : 1) - (down == ' ' ? 0 : 1);
         const short usable_starting_row = up == ' ' ? starting_row : starting_row + 1;
         return {
-            RectangleArea{left == ' ' ? pos : pos - 1,  usable_height, buffer, usable_starting_row, left == ' ' ? starting_col : starting_col + 1},
-            RectangleArea{width - pos - (right == ' ' ? 1 : 2), usable_height, buffer, usable_starting_row, pos + 1}
+            RectangleArea{buffer, left == ' ' ? pos : pos - 1,  usable_height, usable_starting_row, left == ' ' ? starting_col : starting_col + 1},
+            RectangleArea{buffer, width - pos - (right == ' ' ? 1 : 2), usable_height, usable_starting_row, pos + 1}
         };
     }
     else
@@ -86,8 +86,8 @@ std::pair<RectangleArea, RectangleArea> RectangleArea::divide(Divisor d, short p
         const short usable_width = width - (left == ' ' ? 0 : 1) - (right == ' ' ? 0 : 1);
         const short usable_starting_col = left == ' ' ? starting_col : starting_col + 1;
         return {
-            RectangleArea{usable_width, up == ' ' ? pos : pos - 1, buffer, up == ' ' ? starting_row : starting_row + 1, usable_starting_col },
-            RectangleArea{usable_width, height - pos - (down == ' ' ? 1 : 2), buffer, pos + 1, usable_starting_col}
+            RectangleArea{buffer, usable_width, up == ' ' ? pos : pos - 1, up == ' ' ? starting_row : starting_row + 1, usable_starting_col },
+            RectangleArea{buffer, usable_width, height - pos - (down == ' ' ? 1 : 2), pos + 1, usable_starting_col}
         };
     }
 }

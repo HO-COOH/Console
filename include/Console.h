@@ -1,13 +1,20 @@
 #pragma once
-#include <Windows.h>
-#include <iostream>
-#include <string>
-#include <exception>
+
+
 #include <unordered_map>
 
+enum class Direction {
+    UP, DOWN, LEFT, RIGHT
+};
 
-#define LOG(X) ;
+enum MIDDLE {};
 
+enum class FunctionKey {
+    UP, DOWN, LEFT, RIGHT, ENTER, SPACE, BACKSPACE, COUNT
+};
+
+#ifdef WINDOWS
+#include <Windows.h>
 
 enum class Color {
     BLACK = 0,
@@ -25,25 +32,66 @@ enum class BackgroundColor {
     NOCHANGE
 };
 
-enum class Direction {
-    UP, DOWN, LEFT, RIGHT
-};
-
-enum MIDDLE {};
-
-enum class FunctionKey {
-    UP , DOWN , LEFT , RIGHT , ENTER , SPACE , BACKSPACE , COUNT 
-};
-
-inline std::unordered_map<FunctionKey, int> KeyCode { 
+inline std::unordered_map<FunctionKey, int> KeyCode {
     {FunctionKey::UP, VK_UP},
     {FunctionKey::DOWN, VK_DOWN},
     {FunctionKey::LEFT, VK_LEFT},
     {FunctionKey::RIGHT, VK_RIGHT},
     {FunctionKey::ENTER, VK_RETURN},
-    {FunctionKey::SPACE, VK_SPACE}, 
-    {FunctionKey::BACKSPACE, VK_BACK} 
+    {FunctionKey::SPACE, VK_SPACE},
+    {FunctionKey::BACKSPACE, VK_BACK}
 };
+#else //Linux
+
+#include <ncurses.h>
+#include <sstream>
+#define WORD int
+#define HANDLE WINDOW*
+enum class Color
+{
+    BLACK = COLOR_BLACK,
+    RED=COLOR_RED, GREEN=COLOR_GREEN, BLUE=COLOR_BLUE,
+    YELLOW=COLOR_YELLOW, CYAN=COLOR_CYAN, MAGENTA=COLOR_MAGENTA,
+    WHITE=COLOR_WHITE,
+    NOCHANGE
+};
+enum class BackgroundColor
+{
+    RED = COLOR_RED,
+    GREEN = COLOR_GREEN,
+    BLUE = COLOR_BLUE,
+    YELLOW = COLOR_YELLOW,
+    CYAN = COLOR_CYAN,
+    MAGENTA = COLOR_MAGENTA,
+    WHITE = COLOR_WHITE,
+    DEFAULT = COLOR_BLACK,
+    NOCHANGE
+};
+struct COORD
+{
+    int x;
+    int y;
+};
+struct CHAR_INFO
+{
+    union {
+        char AsciiChar;
+        wchar_t UnicodeChar;
+    }Char;
+    WORD Attributes;
+};
+
+
+#endif
+
+#include <iostream>
+#include <string>
+#include <exception>
+#include <string_view>
+
+#define LOG(X) ;
+
+
 
 enum class Shade:wchar_t {
     Full = 0x2588,      //75-100
@@ -65,17 +113,22 @@ private:
     WORD default_attrib;
     WORD current_background_color;
     WORD current_foreground_color;
+#ifdef WINDOWS
     void setColor(WORD color);
+#endif
     void sendPipe(std::string_view msg) const;
     void constructSecondaryConsole();
     void constructStdConsole();
 public:
 
+#ifdef WINDOWS
     class ConsoleException:public std::runtime_error
     {
     public:
         ConsoleException(std::string const& msg):std::runtime_error(msg+" Code: "+ std::to_string(GetLastError())){}
     };
+#else
+#endif
 
     /*Console configuration functions*/
     Console();
@@ -96,14 +149,19 @@ public:
 
     /*Delete content functions*/
     void eraseLine();
+    void deleteTo(COORD position);
     void clear();
     void close();
+
+    /*Read console functions*/
+    template<typename T>
+    T read(const char* prompt="");
 
     /*Write console functions*/
     Console& operator<<(Color color);
     Console& operator<<(BackgroundColor bgColor);
     template <typename T>
-    Console &operator<<(T &&arg) { std::cout << arg; return *this; }
+    Console& operator<<(T&& arg);
     Console& set(Color color=Color::NOCHANGE, bool intensify=true);
     Console& set(BackgroundColor bgColor=BackgroundColor::NOCHANGE, bool intensify=true);
     void changeWindowColor(BackgroundColor bgColor);
@@ -117,27 +175,33 @@ public:
     
     /*Console manipulation functions, inlined for higher performance*/
     void setTitle(std::string const& title);
-    void fillConsole(CHAR_INFO* buffer) const;
-    void fillConsoleW(CHAR_INFO* buffer) const;
+    void fillConsole(CHAR_INFO* buffer);
+    void fillConsoleW(CHAR_INFO* buffer);
+    void beep(int frequency = 800, int duration = 200) const;
 
     ~Console();
 };
 
+#ifdef WINDOWS
 inline void Console::setColor(WORD color)
 {
     if (!SetConsoleTextAttribute(hTerminal, color))
         MessageBox(NULL, TEXT("SetConsoleTextAttributeError"), TEXT("Error"), MB_OK);
 }
+#endif
 
 inline void Console::sendPipe(std::string_view msg) const
 {
+#ifdef WINDOWS
     std::cout << "Sending \"" << msg << "\" -> console 2.\n";
     DWORD bytes_written{};
     if (!WriteFile(hTerminal, msg.data(), msg.length(), &bytes_written, nullptr))
     {
-        puts("Test writting failed");
+        puts("Test writing failed");
         CloseHandle(hTerminal);
     }
+#else
+#endif
 }
 
 
@@ -154,51 +218,153 @@ inline Console& Console::operator<<(BackgroundColor bgColor)
     return *this;
 }
 
+template <typename T>
+Console& Console::operator<<(T&& arg)
+{
+#ifdef WINDOWS
+    std::cout << arg;
+#else
+    std::stringstream ss;
+    ss << arg;
+    printw(ss.str().c_str());
+#endif
+    return *this;
+}
 
 inline void Console::moveCursorTo(COORD position)
 {
+#ifdef WINDOWS
     if (!SetConsoleCursorPosition(hTerminal, position))
         LOG("Move cursor to error!\n");
+#else
+    if(!move(position.y, position.x)!=OK)
+        LOG("Move cursor to error!\n");
+#endif
 }
  
 
 inline void Console::close()
 {
+#ifdef WINDOWS
     PostMessage(GetConsoleWindow(), WM_CLOSE, 0, 0);
+#else
+    endwin();
+#endif
 }
 
 inline Console& Console::putchar(char c, size_t count)
 {
+#ifdef WINDOWS
     CONSOLE_SCREEN_BUFFER_INFO screen_buffer_info;
     //DWORD count;	//If the pointer to the last parameter is set to nullptr, there will be an exception
+#else
+    while(count--)
+        addch(c);
+#endif
     return *this;
 }
 
 
 inline void Console::setTitle(std::string const& title)
 {
+#ifdef WINDOWS
     //if succeeds, the return value is NON 0
     if(!SetConsoleTitleA(title.c_str()))
-        MessageBox(NULL, TEXT("Setting title error"), TEXT("Error"), MB_OK);
+        LOG("Setting title error");
+#else
+    /*
+        May NOT work with all terminals.
+        Must use fflush() during a ncurses session otherwise it will not have effect until ncurses session ended.
+    */
+    std::cout << "\033]0;" << title << "\007";
+    fflush(stdout);
+#endif
 }
 
-inline void Console::fillConsole(CHAR_INFO* buffer) const
+inline void Console::fillConsole(CHAR_INFO* buffer)
 {
+#ifdef WINDOWS
     SMALL_RECT written_region{ 0,0,width - 1, height - 1 };
     if (WriteConsoleOutputA(hTerminal, buffer, { width, height }, { 0,0 }, &written_region) == 0)
         std::cerr << "WriteConsoleOutput error, write: (" << written_region.Left << " ," << written_region.Top << ") -> (" << written_region.Right << " ," << written_region.Bottom << ")\n";
+#else
+    auto pos = getCursorPos();
+    for (auto row = 0; row < height; ++row)
+    {
+        for (auto col = 0; col < width; ++col)
+        {
+            mvaddch(row, col, buffer->Char.AsciiChar);
+            ++buffer;
+        }
+    }
+    moveCursorTo(pos);
+    refresh();
+#endif
 }
 
-inline void Console::fillConsoleW(CHAR_INFO* buffer) const
+inline void Console::fillConsoleW(CHAR_INFO* buffer)
 {
+#ifdef WINDOWS
     SMALL_RECT written_region{ 0,0,width - 1, height - 1 };
     if (WriteConsoleOutputW(hTerminal, buffer, { width, height }, { 0,0 }, &written_region) == 0)
-        std::cerr << "WriteConsoleOutput error, write: (" << written_region.Left << " ," << written_region.Top << ") -> (" << written_region.Right << " ," << written_region.Bottom << ")\n";
+        std::cerr << "WriteConsoleOutput error, write: (" << "Get console screen buffer info failed!\n";
+#else
+    auto pos = getCursorPos();
+    for (auto row = 0; row < height; ++row)
+    {
+        for (auto col = 0; col < width; ++col)
+        {
+            mvaddch(row, col, buffer->Char.UnicodeChar);
+            ++buffer;
+        }
+    }
+    moveCursorTo(pos);
+    refresh();
+#endif
+}
+
+inline void Console::beep(int frequency, int duration) const
+{
+#ifdef WINDOWS
+    Beep(frequency, duration);
+#else
+    /*
+
+    */
+#endif
+}
+
+template<typename T>
+T Console::read(const char* prompt)
+{
+#ifdef WINDOWS
+    T i;
+    do {
+        std::cout << prompt;
+        auto pos = getCursorPos();
+        if (!std::cin)
+        {
+            std::cin.clear();
+            while (std::cin.get() != '\n')
+                ;
+            deleteTo(pos);
+        }
+    } while (!(std::cin >> i));
+    return i;
+#else
+    T i;
+    do{
+        printw(prompt);
+        auto pos = getCursorPos();
+
+    } while (true);
+#endif
 }
 
 template<typename T>
 Console& Console::writeln(const T& arg, Color color)
 {
+#ifdef WINDOWS
     if (color == Color::NOCHANGE)
         std::cout << arg << '\n';
     else
@@ -214,9 +380,17 @@ Console& Console::writeln(const T& arg, Color color)
         else
             std::cerr << "Get console screen buffer info failed!\n";
     }
+#else
+
+#endif
     return *this;
 }
 
+
+
+/*
+    The following code is the nifty-counter idiom applied for constructing a global console object.
+*/
 extern class Console& console;
 class ConsoleInitializer
 {
@@ -225,6 +399,10 @@ class ConsoleInitializer
     static void cleanUp();
 public:
     ConsoleInitializer();
+    ConsoleInitializer(ConsoleInitializer const&) = delete;
+    ConsoleInitializer(ConsoleInitializer&&) = delete;
+    ConsoleInitializer& operator=(ConsoleInitializer const&) = delete;
+    ConsoleInitializer& operator=(ConsoleInitializer&&) = delete;
     ~ConsoleInitializer();
 };
 static ConsoleInitializer consoleInitializer;

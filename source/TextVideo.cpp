@@ -112,9 +112,6 @@ static inline CHAR_INFO to_text(const Color_T pixel)
 
 void Video::drawColorWall()
 {
-    //loop color
-    CHAR_INFO c;
-
     for (auto i = 0; i < color_list.size(); ++i)
     {
         //loop bgColor
@@ -189,101 +186,21 @@ draw thread:
 
 */
 
-//VideoEngine::VideoEngine(std::vector<Video*> instances) : m_engine(instances.front()->m_engine)
-//{
-//    unsigned id = 0;
-//    for (auto instance : instances)
-//    {
-//        if (instance->is_ready)
-//        {
-//            finished_flags.emplace_back(false);
-//            m_instances.emplace_back
-//            (
-//                [&, instance]
-//                {
-//                    unsigned m_id = id;
-//                    cv::VideoCapture video{ instance->m_fileName };
-//                    cv::Mat frame, resized;
-//                    ScopedTimer t{ static_cast<unsigned int>(1.0 / 30 * 1000 * 1000) }; //refactor here
-//                    while (true)
-//                    {
-//                        {
-//                            ready_mutex.lock_shared();
-//                            video >> frame;
-//                            if (frame.empty())
-//                                break;
-//                            cv::resize(frame, resized, { instance->width, instance->height });
-//                            for (auto i = 0; i < instance->height; ++i)
-//                            {
-//                                for (auto j = 0; j < instance->width; ++j)
-//                                {
-//                                    auto pixel = resized.at<cv::Vec3b>(i, j);
-//                                    instance->buffer(i, j) = to_text(pixel[2], pixel[1], pixel[0]);
-//                                }
-//                            }
-//                            ready_mutex.unlock_shared();
-//                            ready_cond.notify_one();
-//                        }
-//                        {
-//                            std::shared_lock lk(drawing_mutex);
-//                            drawing_cond.wait(lk);
-//                            t.wait();
-//                        }
-//                    }
-//                    finished_flags[m_id] = true;
-//                }
-//                );
-//            ++id;
-//        }
-//    }
-//    draw();
-//}
-//
-//VideoEngine::~VideoEngine()
-//{
-//    for (auto& instance : m_instances)
-//        instance.join();
-//}
-//
-//bool VideoEngine::is_all_finished() const
-//{
-//    for (const auto& flag : finished_flags)
-//    {
-//        if (!flag)
-//            return false;
-//    }
-//    return true;
-//}
-//
-//void VideoEngine::draw()
-//{
-//    while (!is_all_finished())
-//    {
-//        {
-//            std::unique_lock lk{ ready_mutex };
-//            std::shared_lock drawing_lock{ drawing_mutex };
-//            drawing_cond.wait(drawing_lock);
-//            m_engine.draw();
-//        }
-//    }
-//}
 
 void VideoEngine::draw()
 {
     while (!is_all_finished())
     {
-        queue.wait_and_pop();
-        {
-            drawing_mutex.lock();
-            m_engine.draw();
-            drawing_mutex.unlock();
-        }
+        std::unique_lock lk{ drawing_mutex };
+        cond.wait(lk, [&] {return processedFrames >= m_instances.size(); });
+        m_engine.draw();
+        processedFrames = 0;
     }
 }
 
 bool VideoEngine::is_all_finished() const
 {
-     for (const auto& flag : finished_flags)
+     for (const auto& flag : finishedFlags)
      {
          if (!flag)
              return false;
@@ -291,27 +208,14 @@ bool VideoEngine::is_all_finished() const
      return true;
 }
 
-namespace {
-    unsigned ready_count(std::vector<Video*> const& instances)
-    {
-        unsigned count = 0;
-        for (auto instance : instances)
-        {
-            if (instance->is_ready)
-                ++count;
-        }
-        return count;
-    }
-}
-//
-VideoEngine::VideoEngine(std::vector<Video*> instances): m_engine(instances.front()->m_engine), queue(ready_count(instances))
+VideoEngine::VideoEngine(std::vector<Video*> instances): m_engine(instances.front()->m_engine), finishedFlags(instances.size())
 {
     unsigned id = 0;
     for (auto instance : instances)
     {
         if (instance->is_ready)
         {
-            finished_flags.emplace_back(false);
+            finishedFlags[id] = false;
             m_instances.emplace_back
             (
                 [&, instance]
@@ -338,11 +242,12 @@ VideoEngine::VideoEngine(std::vector<Video*> instances): m_engine(instances.fron
                                 }
                             }
                             drawing_mutex.unlock_shared();
+                            ++processedFrames;
+                            cond.notify_one();
                         }
-                        queue.push(true);
                         t.wait();
                     }
-                    finished_flags[m_id] = true;
+                    finishedFlags[m_id] = true;
                 }
                 );
             ++id;

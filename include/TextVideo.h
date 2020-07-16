@@ -63,10 +63,10 @@ public:
     void drawColorWall();
     bool is_ready = false;
     friend class VideoEngine;
-    Video(short width, short height, BufferObject& buffer, short starting_row, short starting_col, std::string fileName, ConsoleEngine& engine)
-        :RectangleArea(width, height, buffer, starting_row, starting_col), m_fileName(std::move(fileName)), m_engine(engine) {}
-    Video(short width, short height, BufferObject& buffer, short starting_row, short starting_col, ConsoleEngine& engine)
-        :RectangleArea(width, height, buffer, starting_row, starting_col), m_engine(engine) {}
+    Video(BufferObject& buffer, short width, short height, short starting_row, short starting_col, std::string fileName, ConsoleEngine& engine)
+        :RectangleArea(buffer, width, height, starting_row, starting_col), m_fileName(std::move(fileName)), m_engine(engine) {}
+    Video(BufferObject& buffer, short width, short height, short starting_row, short starting_col, ConsoleEngine& engine)
+        :RectangleArea(buffer, width, height, starting_row, starting_col), m_engine(engine) {}
     //VideoEngine(ConsoleEngine& engine) :RectangleArea(0,0,*static_cast<BufferObject*>(nullptr), 0,0), m_engine(engine) {}   //TODO: factor this
     using RectangleArea::at;
 
@@ -75,40 +75,40 @@ public:
     unsigned int getFrameRate();
 };
 
-#include <queue>
-namespace internal
-{
-    class VideoEvent
-    {
-        mutable std::mutex mut;
-        unsigned event_counter{ 0 };
-        std::condition_variable data_cond;
-        unsigned m_count;
-    public:
-        VideoEvent(unsigned count):m_count(count) {}
-        void push(bool flag)
-        {
-            {
-                std::lock_guard lk{ mut };
-                ++event_counter;
-            }
-            data_cond.notify_one();
-        }
-        void wait_and_pop()
-        {
-            std::unique_lock lk{ mut };
-            data_cond.wait(lk, [&] {return event_counter>=m_count; });
-            event_counter = 0;
-            data_cond.notify_all();
-        }
-        void wait_for_empty()
-        {
-            std::unique_lock lk{ mut };
-            data_cond.wait(lk, [&] {return event_counter == 0; });
-            data_cond.notify_all();
-        }
-    };
-}
+//#include <queue>
+//namespace internal
+//{
+//    class VideoEvent
+//    {
+//        mutable std::mutex mut;
+//        unsigned event_counter{ 0 };
+//        std::condition_variable data_cond;
+//        unsigned m_count;
+//    public:
+//        VideoEvent(unsigned count):m_count(count) {}
+//        void push(bool flag)
+//        {
+//            {
+//                std::lock_guard lk{ mut };
+//                ++event_counter;
+//            }
+//            data_cond.notify_one();
+//        }
+//        void wait_and_pop()
+//        {
+//            std::unique_lock lk{ mut };
+//            data_cond.wait(lk, [&] {return event_counter>=m_count; });
+//            event_counter = 0;
+//            data_cond.notify_all();
+//        }
+//        void wait_for_empty()
+//        {
+//            std::unique_lock lk{ mut };
+//            data_cond.wait(lk, [&] {return event_counter == 0; });
+//            data_cond.notify_all();
+//        }
+//    };
+//}
 
 //#include <stack>
 //class VideoEngine
@@ -130,13 +130,18 @@ namespace internal
 //    VideoEngine(std::vector<Video*> instances);
 //    ~VideoEngine();
 //};
+
+#include <atomic>
 class VideoEngine
 {
     ConsoleEngine& m_engine;
-    internal::VideoEvent queue;
     std::vector<std::thread> m_instances;
-    std::deque<std::atomic_bool> finished_flags;
+    std::vector<std::atomic_bool> finishedFlags;
+
+    std::atomic<int> processedFrames;
     std::shared_mutex drawing_mutex;
+    std::condition_variable_any cond;
+
     void draw();
     bool is_all_finished() const;
 public:
@@ -150,11 +155,11 @@ class PictureEngine:public RectangleArea
     std::string m_fileName;
     ConsoleEngine& m_engine;
 public:
-    PictureEngine(short width, short height, BufferObject& buffer, short starting_row, short starting_col, std::string fileName, ConsoleEngine& engine)
-        :RectangleArea(width, height, buffer, starting_row, starting_col), m_fileName(std::move(fileName)), m_engine(engine) {}
+    PictureEngine(BufferObject& buffer, short width, short height, short starting_row, short starting_col, std::string fileName, ConsoleEngine& engine)
+        :RectangleArea(buffer, width, height, starting_row, starting_col), m_fileName(std::move(fileName)), m_engine(engine) {}
 
-    PictureEngine(short width, short height, BufferObject& buffer, short starting_row, short starting_col, ConsoleEngine& engine)
-        :RectangleArea(width, height, buffer, starting_row, starting_col), m_engine(engine) {}
+    PictureEngine(BufferObject& buffer, short width, short height, short starting_row, short starting_col, ConsoleEngine& engine)
+        :RectangleArea(buffer, width, height, starting_row, starting_col), m_engine(engine) {}
 
     void load(std::string_view fileName);
     void load();
