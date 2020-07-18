@@ -104,7 +104,7 @@
 #include <iostream>
 
 #ifdef LINUX
-void test()
+static void test()
 {
     initscr();
     start_color();
@@ -123,7 +123,7 @@ void test()
 }
 #endif
 
-void test2()
+static void test2()
 {
     console.printConsoleInfo();
     /*Setting text color using familiar syntax */
@@ -144,9 +144,15 @@ void test2()
 
     /*Erase one line or clear the whole window */
     console << "Press enter to delete this line: ";
-    std::cin.get();
+    console.waitEnter();
     console.eraseLine();
-    std::cin.get();
+
+    /*Read data using familiar syntax, always work as you intended*/
+    console << "Read a string: ";
+
+    auto str = console.read<std::string>();
+    console << "You entered: " << str << '\n';
+    console.waitEnter();
     console.clear();
 }
 int main(int argc, char *argv[])

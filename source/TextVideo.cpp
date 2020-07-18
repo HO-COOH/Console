@@ -32,11 +32,11 @@ static constexpr const std::array<std::pair<BackgroundColor, Color_T>, 8> bgColo
 
 static constexpr const std::array<std::pair<Shade, float>, 5> shade_list
 {
-    std::pair{Shade::Full, 1.0f},
-    {Shade::Dark, 0.75f},
-    {Shade::Medium, 0.5f},
+    std::pair{Shade::None, 0.0f},
     {Shade::Light, 0.25f},
-    {Shade::None, 0.0f}
+    {Shade::Medium, 0.5f},
+    {Shade::Dark, 0.75f},
+    {Shade::Full, 1.0f}
 };
 
 
@@ -50,37 +50,11 @@ static constexpr const std::array<std::pair<Shade, float>, 5> shade_list
 
 static inline std::pair<Shade, float> getShade(Color_T pixel)
 {
-    const auto lightness = pixel.getIntensity();
-    if (lightness <= 0.2)
-        return { Shade::None,0.0f };
-    if (lightness <= 0.4)
-        return { Shade::Light, 0.25f };
-    if (lightness <= 0.6)
-        return { Shade::Medium, 0.5f } ;
-    if (lightness <= 0.8)
-        return { Shade::Dark, 0.75f };
-    return { Shade::Full, 1.0f };
+    return shade_list[min(pixel.getIntensity(), 0.99f) * (shade_list.size())];//prevent overflowing when intensity==1.0f
 }
 
 static inline CHAR_INFO to_text(const Color_T pixel)
-{
-    /*Extremely CPU intensive */
-
-    //std::array<int, color_list.size()*bgColor_list.size()*shade_list.size()> distance;
-    //for (auto i = 0, index=0; i < color_list.size(); ++i)
-    //{
-    //    for (auto j = 0; j < bgColor_list.size(); ++j)
-    //    {
-    //        for(auto k=0; k<shade_list.size(); ++k,++index)
-    //            distance[index] = colorDistance(
-    //                Color_T{ r,g,b }, color_list[i].second * shade_list[k].second + bgColor_list[j].second * (1-shade_list[k].second));
-    //    }
-    //}
-    //auto index = std::distance(distance.cbegin(), std::min_element(distance.cbegin(), distance.cend()));
-    //auto color = color_list[index/bgColor_list.size()/shade_list.size()].first;
-    //auto bgColor = bgColor_list[index%(bgColor_list.size()*shade_list.size())/bgColor_list.size()].first;
-    //auto shade = shade_list[index % shade_list.size()].first;
-    
+{    
     const auto [shade, shade_factor] = getShade(pixel);
     std::array<int, color_list.size()> distance;
     for (auto i = 0; i < color_list.size(); ++i)
@@ -148,19 +122,9 @@ void Video::play(unsigned int frameRate)
         if (frame.empty())
             break;
         cv::resize(frame, resized, { width, height });
-        for (auto i = 0; i < height; ++i)
-        {
-            /*Use pointer dereference instead of array indexing for slightly lower CPU usage */
-            auto bufferPtr = &at(i, 0);
-            auto resizedRowPtr = resized.ptr<cv::Vec3b>(i);
-            for (auto j = 0; j < width; ++j)
-            {
-                const auto pixel = *resizedRowPtr;
-                *bufferPtr = to_text(Color_T{ pixel[2], pixel[1], pixel[0] });
-                ++bufferPtr;
-                ++resizedRowPtr;
-            }
-        }
+
+        /*new implementation*/
+        std::transform(resized.begin<cv::Vec3b>(), resized.end<cv::Vec3b>(), &at(0, 0), [](auto pixel) {return to_text(Color_T{ pixel[2], pixel[1], pixel[0] }); });
         t.wait();
         m_engine.draw();
     }
@@ -171,20 +135,6 @@ unsigned int Video::getFrameRate()
     //TODO: here
     return 30;
 }
-
-/*  
-draw thread:
-    while(true)
-        for each ready_mutex:
-            ready_mutex.lock()
-        //all finished
-        engine.draw()
-        for each ready_mutex:
-            ready_mutex.unlock
-
-
-*/
-
 
 void VideoEngine::draw()
 {
@@ -219,7 +169,7 @@ VideoEngine::VideoEngine(std::vector<std::reference_wrapper<Video>> instances): 
             (
                 [&, instance]
                 {
-                    auto m_id = id;
+                    auto const m_id = id;
                     cv::VideoCapture video{ instance.get().m_fileName };
                     cv::Mat frame, resized;
                     ScopedTimer t{ static_cast<unsigned int>(1.0 / 30 * 1000 * 1000) }; //refactor here
@@ -271,7 +221,7 @@ void PictureEngine::load()
 {
     if (std::filesystem::directory_entry{ std::filesystem::path{ m_fileName } }.exists())
     {
-        auto original = cv::imread(m_fileName);
+        auto const original = cv::imread(m_fileName);
         cv::Mat resized;
         cv::resize(original, resized, { width, height });
         for (auto i = 0; i < height; ++i)

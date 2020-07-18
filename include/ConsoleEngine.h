@@ -2,18 +2,21 @@
 #include "TextVideo.h"
 #include "BufferObject.hpp"
 #include <mutex>
+#include <atomic>
 class ConsoleEngine
 {
 private:
     short width;
     short height;
-    Console* ptr;
+    Console& ptr;
     bool wcharMode;
     mutable std::mutex mut;
     bool multiThreadingMode = false;
+    std::atomic_int frames = 0;
+    std::atomic_bool stop = false;
 public:
     BufferObject buffer;
-    ConsoleEngine(Console& window, bool wcharMode=false) :width(window.getWidth()), height(window.getHeight()), buffer(height, width), ptr(&window), wcharMode(wcharMode) 
+    ConsoleEngine(Console& window, bool wcharMode=false) :width(window.getWidth()), height(window.getHeight()), buffer(height, width), ptr(window), wcharMode(wcharMode) 
     {
         CHAR_INFO init;
         init.Attributes = 7;
@@ -24,23 +27,24 @@ public:
         std::fill_n(*buffer, width * height, init);
     }
 
-    void draw() const
+    void draw()
     {
-        if (multiThreadingMode)
+        if (!multiThreadingMode)
         {
-            std::lock_guard lk{ mut };
             if (wcharMode)
-                ptr->fillConsoleW(*buffer);
+                ptr.fillConsoleW(*buffer);
             else
-                ptr->fillConsole(*buffer);
+                ptr.fillConsole(*buffer);
         }
         else/*[[likely]]*/
         {
+            std::lock_guard lk{ mut };
             if (wcharMode)
-                ptr->fillConsoleW(*buffer);
+                ptr.fillConsoleW(*buffer);
             else
-                ptr->fillConsole(*buffer);
+                ptr.fillConsole(*buffer);
         }
+        ++frames;
     }
 
     template <typename ToDraw, typename... Args>
@@ -98,4 +102,20 @@ public:
     void setAsciiMode() { wcharMode = false; }
     void setMultiThreadingMode(){ multiThreadingMode = true; }
     void setSingleThreadingMode() { multiThreadingMode = false; }
+    void showFPS()
+    {
+        static std::thread t
+        {
+            [&]
+            {
+                while(!stop)
+                {
+                    ptr.setTitle("FPS: " + std::to_string(frames));
+                    frames = 0;
+                    std::this_thread::sleep_for(std::chrono::seconds{ 1 });
+                }
+            }
+        };
+    }
+    ~ConsoleEngine() { stop = true; }
 };

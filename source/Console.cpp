@@ -139,6 +139,7 @@ Console& Console::resetConsole(short width, short height, short fontWidth, short
     }
     else
         constructSecondaryConsole();    //TODO: enable same functionality to the secondary console window
+    return *this;
 }
 
 void Console::printConsoleInfo()
@@ -182,11 +183,13 @@ Console& Console::set(Color color, bool intensify)
 Console& Console::set(std::pair<Color, bool> color)
 {
     set(color.first, color.second);
+    return *this;
 }
 
 Console& Console::set(std::pair<BackgroundColor, bool> bgColor)
 {
     set(bgColor.first, bgColor.second);
+    return *this;
 }
 
 Console& Console::set(BackgroundColor bgColor, bool intensify)
@@ -245,10 +248,8 @@ void Console::backspace(short count)
     FillConsoleOutputCharacterA(hTerminal, ' ', pos.X + 1, { 0,pos.Y }, &actual_written);
 #else
     auto pos = getCursorPos();
-    moveCursorTo({ 0, pos.y });
-    for (auto i = 0; i < pos.x; ++i)
-        addch(' ');
-    moveCursorTo({ 0, pos.y });
+    while (count-- && pos.x>=0)
+        mvwaddch(hTerminal, pos.y, pos.x--, ' ');
     refresh();
 #endif
 }
@@ -312,9 +313,10 @@ void Console::moveCursorTo(MIDDLE)
     GetConsoleScreenBufferInfo(hTerminal, &screen_buffer_info);
     SetConsoleCursorPosition(hTerminal, { width / 2, screen_buffer_info.dwCursorPosition.Y });
 #else
-    int x, y;
-    getmaxyx(hTerminal, y, x);
-    if(move(y, x/2)!=OK)
+    int maxX, y, x;
+    getmaxyx(hTerminal, y, maxX);
+    getyx(hTerminal, y, x);
+    if(wmove(hTerminal, y, maxX/2)!=OK)
         LOG("Move Cursor Error");
     refresh();
 #endif
@@ -358,14 +360,12 @@ void Console::eraseLine()
     if (pos.x == 0)
     {
         /*move to the upper line*/
-        int length = 0;
-        while (!isspace(static_cast<char>(mvinch(pos.y - 1, length) & A_CHARTEXT)))
-            ++length;
-        backspace(length);
+        moveCursorTo({ width - 1, pos.y - 1 });
+        backspace(width - 1);
         moveCursorTo({ 0, pos.y - 1 });
     }
     else
-        backspace(pos.y);
+        backspace(width);
     refresh();
 #endif
 }

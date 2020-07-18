@@ -199,6 +199,11 @@ public:
     template<typename T>
     T read(const char* prompt = nullptr, bool reprompt = true);
 
+    Console& waitEnter();
+
+    template<typename T>
+    Console& operator>>(T& value);
+
     /*Write console functions*/
     Console& operator<<(Color color);
     Console& operator<<(BackgroundColor bgColor);
@@ -291,9 +296,14 @@ Console& Console::operator<<(T&& arg)
 #ifdef WINDOWS
     std::cout << arg;
 #else
-    std::stringstream ss;
-    ss << arg;
-    printw(ss.str().c_str());
+    if constexpr (std::is_same_v<T, std::string>)
+        printw(arg.c_str());
+    else
+    {
+        std::stringstream ss;
+        ss << arg;
+        printw(ss.str().c_str());
+    }
     refresh();
 #endif
     return *this;
@@ -305,7 +315,7 @@ inline void Console::moveCursorTo(COORD position)
     if (!SetConsoleCursorPosition(hTerminal, position))
         LOG("Move cursor to error!\n");
 #else
-    if(!move(position.y, position.x)!=OK)
+    if(wmove(hTerminal, position.y, position.x)!=OK)
         LOG("Move cursor to error!\n");
 #endif
 }
@@ -406,6 +416,18 @@ template<typename T>
 T Console::read(const char* prompt, bool reprompt)
 {
 #ifdef WINDOWS
+    if constexpr (std::is_same_v<T, char>)
+    {
+        char c = std::cin.get();
+        std::cin.get(); //eat the enter key
+        return c;
+    }
+    if constexpr (std::is_same_v<T, std::string>)
+    {
+        std::string str;
+        std::getline(std::cin, str);
+        return str;
+    }
     T i;
     do {
         if(prompt)
@@ -425,16 +447,43 @@ T Console::read(const char* prompt, bool reprompt)
     do{
         if(prompt)
             printw(prompt);
-        auto pos = getCursorPos();
         std::stringstream ss;
         char c;
         while ((c = getch()) != '\n')
             ss << c;
-        ss >> i;
+        if constexpr (std::is_same_v<T, std::string>)
+            std::getline(ss, i);
+        else
+            ss >> i;
         if (ss)
-            break;
+            return i;
     } while (true);
 #endif
+}
+
+inline Console& Console::waitEnter()
+{
+    auto const pos = getCursorPos();
+#ifdef WINDOWS
+    std::cin.get();
+#else
+    char c;
+    do {
+        c = getch();
+    } while (c != '\n');
+#endif
+    moveCursorTo(pos);
+#ifdef LINUX
+    refresh();
+#endif
+    return *this;
+}
+
+template<typename T>
+Console& Console::operator>>(T& value)
+{
+    value = read<T>();
+    return *this;
 }
 
 template<typename T>
@@ -461,7 +510,7 @@ Console& Console::writeln(const T& arg, Color color)
         *this << arg << '\n';
     else
     {
-        auto oldColor = current_foreground_color;
+        auto const oldColor = current_foreground_color;
         set(color);
         *this << arg << '\n';
         set(oldColor);

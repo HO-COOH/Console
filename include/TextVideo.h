@@ -39,6 +39,9 @@ struct Color_T
             static_cast<uint8_t>(((int)b - rhs.b) <0? 0: b-rhs.b) 
         };
     }
+    /**
+     * @brief return a value within [0.0-1.0] scale representing the intensity of the color
+    */
     float getIntensity() const
     {
         return (float(r) + float(g) + float(b)) / 3.0f /(float)(UINT8_MAX) ;

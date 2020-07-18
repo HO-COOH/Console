@@ -11,6 +11,9 @@ void VideoTestSingle(std::string const& file)
 {
     ConsoleEngine engine{ console };
     engine.setWcharMode();
+#ifdef _DEBUG
+    engine.showFPS();
+#endif
     /*Play a single video*/
     /*Or use multithreading to play multiple videos at once*/
 
@@ -105,11 +108,15 @@ inline void printUsage()
 
 void test()
 {
-    VideoTestDual("test.mp4", "test2.mp4");
+    VideoTestSingle("test2.mp4");
+    //VideoTestDual("test.mp4", "test2.mp4");
 }
 
 int main(int argc, char** argv)
 {
+#ifdef _DEBUG
+    test();
+#endif
     const auto argCount = argc - 1;
     if(argc==2)
         system(argv[1]);
